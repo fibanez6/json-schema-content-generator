@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "enum-prop": {
+      "enum": [
+        "ENUM_01",
+        "ENUM_02",
+        "ENUM_03",
+        "ENUM_04",
+        "ENUM_05"
+      ]
+    }
+  }
+}

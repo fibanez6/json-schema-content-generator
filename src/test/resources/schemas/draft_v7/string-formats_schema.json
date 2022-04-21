@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "type": "string",
+      "format": "time"
+    },
+    "idn-email": {
+      "type": "string",
+      "format": "idn-email"
+    },
+    "idn-hostname": {
+      "type": "string",
+      "format": "idn-hostname"
+    },
+    "relative-json-pointer": {
+      "type": "string",
+      "format": "relative-json-pointer"
+    },
+    "iri": {
+      "type": "string",
+      "format": "iri"
+    },
+    "iri-reference": {
+      "type": "string",
+      "format": "iri-reference"
+    }
+  }
+}

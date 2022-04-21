@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "integer": {
+      "type": "integer"
+    },
+    "number": {
+      "type": "number"
+    },
+    "range-min-max": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "range-negative-min-max": {
+      "type": "number",
+      "minimum": -100,
+      "maximum": 0
+    },
+    "multipleOf-2": {
+      "type": "number",
+      "multipleOf": 2
+    },
+    "multipleOf-3": {
+      "type": "number",
+      "minimum": 3,
+      "maximum": 9,
+      "multipleOf": 3
+    },
+    "multipleOf-5": {
+      "type": "number",
+      "minimum": -50,
+      "maximum": -5,
+      "multipleOf": 5
+    },
+    "multipleOf-7": {
+      "type": "number",
+      "maximum": 70,
+      "multipleOf": 7
+    },
+    "range-exclusive-mini-max": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 100
+    }
+  }
+}

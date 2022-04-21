@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "string": {
+      "type": "string"
+    },
+    "min-max-length": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 3
+    }
+  }
+}

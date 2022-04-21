@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "unicode": {
+      "type": "string",
+      "pattern": "(^[\\u0041-\\u005A\\u0061-\\u007A\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u0130\\u0132-\\u0137\\u0139-\\u0148\\u014A-\\u017E\\u0180-\\u0183\\u0187-\\u0188\\u018A-\\u018C\\u0191-\\u0193\\u0197-\\u019A\\u019D-\\u01A1\\u01A4-\\u01A5\\u01AB-\\u01B0\\u01B2-\\u01B6\\u01CD-\\u01DC\\u01DE-\\u01E1\\u01E4-\\u01ED\\u01F0-\\u01F0\\u01F4-\\u01F5\\u01F8-\\u01FB\\u01FE-\\u021B\\u021E-\\u0221\\u0224-\\u0236\\u023A-\\u0240\\u0243-\\u0243\\u0246-\\u0249\\u024B-\\u024F\\u1E00-\\u1E9A\\u1EA0-\\u1EF9\\u1EFE-\\u1EFF][-', \\u0041-\\u005A\\u0061-\\u007A\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u0130\\u0132-\\u0137\\u0139-\\u0148\\u014A-\\u017E\\u0180-\\u0183\\u0187-\\u0188\\u018A-\\u018C\\u0191-\\u0193\\u0197-\\u019A\\u019D-\\u01A1\\u01A4-\\u01A5\\u01AB-\\u01B0\\u01B2-\\u01B6\\u01CD-\\u01DC\\u01DE-\\u01E1\\u01E4-\\u01ED\\u01F0-\\u01F0\\u01F4-\\u01F5\\u01F8-\\u01FB\\u01FE-\\u021B\\u021E-\\u0221\\u0224-\\u0236\\u023A-\\u0240\\u0243-\\u0243\\u0246-\\u0249\\u024B-\\u024F\\u1E00-\\u1E9A\\u1EA0-\\u1EF9\\u1EFE-\\u1EFF]*$)",
+      "description": "unicode"
+    },
+    "exceptLessThan": {
+      "type": "string",
+      "pattern": "^[^<]{1,}$",
+      "description": "any chars except <"
+    },
+    "optional": {
+      "type": "string",
+      "pattern": "(^D<AAA$|^C<BBB$)",
+      "description": "\"start and end of string between parenthesis. result should be D<AAA or C<BBB"
+    },
+    "dateXX": {
+      "type": "string",
+      "pattern": "^\\d{2}(\\d{2}|XX)(\\d{2}|XX)$"
+    },
+    "hex": {
+      "type": "string",
+      "pattern": "^[\\x21-\\x7E]{1,1000}$",
+      "description": "hex"
+    },
+    "question-mark ": {
+      "type": "string",
+      "pattern": "^text:[0-9a-f]{3}-(?:[0-9a-f]{4}-){3}$",
+      "description": "contains ?: - Match everything enclosed, but won't create a capture group"
+    }
+  }
+}
