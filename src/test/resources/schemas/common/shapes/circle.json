@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "radius": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "radius"
+  ]
+}

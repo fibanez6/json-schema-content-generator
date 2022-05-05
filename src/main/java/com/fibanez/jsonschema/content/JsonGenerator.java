@@ -1,6 +1,6 @@
 package com.fibanez.jsonschema.content;
 
-import com.fibanez.jsonschema.content.generator.CrumbPath;
+import com.fibanez.jsonschema.content.generator.JsonNode;
 import com.fibanez.jsonschema.content.generator.SchemaGenerator;
 import com.fibanez.jsonschema.content.validator.DurationFormatValidator;
 import com.fibanez.jsonschema.content.validator.UuidFormatValidator;
@@ -42,7 +42,7 @@ public final class JsonGenerator {
     private JSONObject generate(JSONObject jsonSchema) {
         Schema schema = getSchema(jsonSchema);
         SchemaGenerator generator = Context.getSchemaGenerator(schema.getClass());
-        return (JSONObject) generator.generate(schema, CrumbPath.ROOT);
+        return (JSONObject) generator.generate(schema, JsonNode.ROOT);
     }
 
     private Schema getSchema(JSONObject schemaJson) {
@@ -53,10 +53,10 @@ public final class JsonGenerator {
 
     private SchemaLoader.SchemaLoaderBuilder getSchemaBuilder() {
         SchemaLoader.SchemaLoaderBuilder builder = SchemaLoader.builder();
-        builder.schemaClient(SchemaClient.classPathAwareClient());
         String classpath = context.getDefinitionsPath();
         if (StringUtils.isNotEmpty(classpath)) {
             builder.resolutionScope("classpath://" + classpath);
+            builder.schemaClient(SchemaClient.classPathAwareClient());
         }
         builder.draftV6Support();
         builder.draftV7Support();

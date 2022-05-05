@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "ipv6": {
+      "type": "string",
+      "format": "ipv6"
+    }
+  }
+}

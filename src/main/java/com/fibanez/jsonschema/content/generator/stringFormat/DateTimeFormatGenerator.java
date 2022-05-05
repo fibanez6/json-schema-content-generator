@@ -36,7 +36,7 @@ public final class DateTimeFormatGenerator implements FormatGenerator {
 
     @Override
     public String get() {
-        DateTimeFormatter dtf = Objects.nonNull(formatter) ?  formatter :  Context.context().getDateTimeFormatter();
+        DateTimeFormatter dtf = Objects.nonNull(formatter) ? formatter : Context.current().getDateTimeFormatter();
         LocalDateTime random = RandomUtils.between(from, to);
         return dtf.format(random.atOffset(ZoneOffset.UTC));
     }

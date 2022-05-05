@@ -24,11 +24,7 @@ import java.util.stream.Stream;
 
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.createContext;
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.validate;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class StringSchemaGeneratorTest {
@@ -44,7 +40,7 @@ class StringSchemaGeneratorTest {
 
     @Test
     void shouldThrowException_whenNulls() {
-        assertThrows(NullPointerException.class, () -> generator.generate(null, CrumbPath.ROOT));
+        assertThrows(NullPointerException.class, () -> generator.generate(null, JsonNode.ROOT));
         assertThrows(NullPointerException.class, () -> generator.generate(schemaBuilder.build(), null));
     }
 
@@ -54,15 +50,16 @@ class StringSchemaGeneratorTest {
         schemaBuilder = schemaBuilder.minLength(min).maxLength(max);
         StringSchema schema = new StringSchema(schemaBuilder);
 
-        String result = generator.generate(schema, CrumbPath.ROOT);
+        String result = generator.generate(schema, JsonNode.ROOT);
 
         Integer expectedMin = Objects.nonNull(min) ? min : Context.DEFAULT_STRING_LENGTH_MIN;
         Integer expectedMax = Objects.nonNull(max) ? max : Context.DEFAULT_STRING_LENGTH_MAX;
-        assertThat(result.length(), is(greaterThanOrEqualTo(expectedMin)));
+
         if (expectedMin.equals(expectedMax)) {
-            assertThat(result.length(), is(equalTo(expectedMax)));
+            assertThat(result).hasLength(expectedMax);
         } else {
-            assertThat(result.length(), is(lessThan(expectedMax)));
+            assertThat(result.length()).isAtLeast(expectedMin);
+            assertThat(result.length()).isLessThan(expectedMax);
         }
     }
 
@@ -72,7 +69,7 @@ class StringSchemaGeneratorTest {
         schemaBuilder = schemaBuilder.formatValidator(formatValidator);
         StringSchema schema = new StringSchema(schemaBuilder);
 
-        String result = generator.generate(schema, CrumbPath.ROOT);
+        String result = generator.generate(schema, JsonNode.ROOT);
         validate(formatValidator, result);
     }
 

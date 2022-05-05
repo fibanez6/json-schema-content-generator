@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "circle": {
+      "$ref": "../common/shapes/circle.json#"
+    },
+    "rectangles": {
+      "type": "array",
+      "items": {
+        "$ref": "../common/shapes/simple.json#/definitions/Rectangle"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "circle"
+  ]
+}

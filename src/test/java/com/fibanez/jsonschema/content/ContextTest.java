@@ -1,5 +1,7 @@
 package com.fibanez.jsonschema.content;
 
+import com.fibanez.jsonschema.content.generator.Generator;
+import com.fibanez.jsonschema.content.generator.JsonNode;
 import com.fibanez.jsonschema.content.generator.NumberSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.ObjectSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.StringSchemaGenerator;
@@ -9,7 +11,6 @@ import com.fibanez.jsonschema.content.generator.javaType.StringGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.DateFormatGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.DateTimeFormatGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator.Format;
-import com.fibanez.jsonschema.content.generator.util.RandomUtils;
 import com.fibanez.jsonschema.content.testUtil.TestSchema;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.ObjectSchema;
@@ -17,6 +18,7 @@ import org.everit.json.schema.StringSchema;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.Duration;
@@ -25,21 +27,21 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.FIXTURE;
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.createContext;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static com.fibanez.jsonschema.content.testUtil.TestUtils.createJsonNode;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ContextTest {
 
@@ -49,7 +51,7 @@ class ContextTest {
     void shouldReturnContext_withDefaults() {
         Context context = createContext(defaultConfig);
 
-        assertThat(context.getDefinitionsPath(), isEmptyOrNullString());
+        assertThat(context.getDefinitionsPath()).isNull();
         assertFalse(context.isOnlyRequiredProps());
 
         assertNotNull(context.getDateFormatter());
@@ -67,20 +69,21 @@ class ContextTest {
         assertNotNull(context.getDurationFrom());
         assertNotNull(context.getDurationTo());
 
-        assertThat(context.getStringLengthMax(), is(greaterThanOrEqualTo(0)));
-        assertThat(context.getStringLengthMin(), is(lessThanOrEqualTo(Integer.MAX_VALUE)));
+        assertThat(context.getStringLengthMax()).isAtLeast(0);
+        assertThat(context.getStringLengthMin()).isLessThan(Integer.MAX_VALUE);
 
-        assertThat(context.getNumberMin(), is(0));
-        assertThat(context.getNumberMax(), is(Integer.MAX_VALUE));
+        assertThat(context.getNumberMin()).isEqualTo(0);
+        assertThat(context.getNumberMax()).isEqualTo(Integer.MAX_VALUE);
 
-        assertThat(context.getArrayItemsMin(), is(1));
-        assertThat(context.getArrayItemsMax(), is(5));
+        assertThat(context.getArrayItemsMin()).isEqualTo(1);
+        assertThat(context.getArrayItemsMax()).isEqualTo(5);
 
         assertFalse(context.getSchemaGenerators().isEmpty());
         assertFalse(context.getStringFormatGenerators().isEmpty());
         assertFalse(context.getJavaTypeGenerators().isEmpty());
+        assertFalse(context.getPredefinedValueGenerators().isEmpty());
 
-        assertEquals(Context.context(), context);
+        assertEquals(Context.current(), context);
     }
 
     @Test
@@ -171,9 +174,9 @@ class ContextTest {
                 .stringFormatGenerator(rndKey, () -> FIXTURE.create(String.class))
                 .build();
         Context context = createContext(config);
-        Map<String, Supplier<String>> stringFormatGenerators = context.getStringFormatGenerators();
+        Map<String, Generator<String>> stringFormatGenerators = context.getStringFormatGenerators();
         assertInstanceOf(DateTimeFormatGenerator.class, stringFormatGenerators.get("date-time"));
-        assertInstanceOf(Supplier.class, stringFormatGenerators.get(rndKey));
+        assertInstanceOf(Generator.class, stringFormatGenerators.get(rndKey));
         assertFalse(stringFormatGenerators.get("date") instanceof DateFormatGenerator);
     }
 
@@ -189,7 +192,7 @@ class ContextTest {
                 .javaTypeGenerator(Integer.class, () -> FIXTURE.create(Integer.class))
                 .build();
         Context context = createContext(config);
-        Map<Class<?>, Supplier<?>> javaTypeGenerators = context.getJavaTypeGenerators();
+        Map<Class<?>, Generator<?>> javaTypeGenerators = context.getJavaTypeGenerators();
         assertInstanceOf(StringGenerator.class, javaTypeGenerators.get(String.class));
         assertFalse(javaTypeGenerators.get(Integer.class) instanceof IntegerGenerator);
     }
@@ -201,94 +204,259 @@ class ContextTest {
     }
 
     @Test
-    void shouldReturnContext_whenStringLengthMaxMin() {
-        Integer min = RandomUtils.between(0,10);
-        Integer max = min + RandomUtils.between(0,10);
+    void shouldReturnContext_withPredefinedValueGenerators() {
+        String property01 = FIXTURE.create(String.class);
+        String property02 = FIXTURE.create(String.class);
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .predefinedValueGenerator(property01, () -> FIXTURE.create(String.class))
+                .predefinedValueGenerator(property02, new StringGenerator())
+                .build();
+        Context context = createContext(config);
+        Map<String, Supplier<?>> valueGenerators = context.getPredefinedValueGenerators();
+        assertInstanceOf(Supplier.class, valueGenerators.get(property01));
+        assertInstanceOf(StringGenerator.class, valueGenerators.get(property02));
+        assertInstanceOf(Supplier.class, valueGenerators.get("name"));
+    }
+
+    @Test
+    void shouldReturnGenerator_whenPredefinedValueGenerator_pathFound() throws Exception {
+        String propertyName = FIXTURE.create(String.class);
+        String path = FIXTURE.create(String.class) + "/" + propertyName;
+        String pathValue = FIXTURE.create(String.class);
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .predefinedValueGenerator(path, () -> pathValue)
+                .predefinedValueGenerator(propertyName, () -> FIXTURE.create(String.class))
+                .build();
+        createContext(config);
+        JsonNode jsonNode = createJsonNode(path, propertyName);
+        Optional<Supplier<?>> generator = Context.getPredefinedValueGenerator(jsonNode);
+        assertEquals(pathValue, generator.get().get());
+    }
+
+    @Test
+    void shouldReturnGenerator_whenPredefinedValueGenerator_propertyNameFound() throws Exception {
+        String propertyName = FIXTURE.create(String.class);
+        String propertyNameValue = FIXTURE.create(String.class);
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .predefinedValueGenerator(propertyName, () -> propertyNameValue)
+                .build();
+        createContext(config);
+        JsonNode jsonNode = createJsonNode(FIXTURE.create(String.class), propertyName);
+        Optional<Supplier<?>> generator = Context.getPredefinedValueGenerator(jsonNode);
+        assertEquals(propertyNameValue, generator.get().get());
+    }
+
+    @Test
+    void shouldReturnEmpty_whenPredefinedValueGenerator_noFound() {
+        createContext(defaultConfig);
+        Optional<Supplier<?>> generator = Context.getPredefinedValueGenerator(JsonNode.ROOT);
+        assertTrue(generator.isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,2000", "2000,null", "2000,2100"}, nullValues = {"null"})
+    void shouldReturnContext_whenLocalDateFromTo(Integer yearFrom, Integer yearTo) {
+        LocalDate from = Objects.nonNull(yearFrom) ? LocalDate.of(yearFrom, 1, 1) : null;
+        LocalDate to = Objects.nonNull(yearTo) ? LocalDate.of(yearTo, 12, 31) : null;
+
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .dateFrom(from)
+                .dateTo(to)
+                .build();
+
+        LocalDate expectedFrom = Objects.nonNull(yearFrom) ? from : Context.DEFAULT_LOCAL_DATE_FROM;
+        LocalDate expectedTo = Objects.nonNull(yearTo) ? to : Context.DEFAULT_LOCAL_DATE_TO;
+
+        Context context = createContext(config);
+        assertEquals(expectedFrom, context.getDateFrom());
+        assertEquals(expectedTo, context.getDateTo());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,1000", "4000,null", "2000,1900"}, nullValues = {"null"})
+    void shouldThrowException_whenInvalidLocalDateFromTo(Integer yearFrom, Integer yearTo) {
+        LocalDate from = Objects.nonNull(yearFrom) ? LocalDate.of(yearFrom, 1, 1) : null;
+        LocalDate to = Objects.nonNull(yearTo) ? LocalDate.of(yearTo, 12, 31) : null;
+
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .dateFrom(from)
+                .dateTo(to)
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,10", "22,null", "1,5"}, nullValues = {"null"})
+    void shouldReturnContext_whenLocalTimeFromTo(Integer minHour, Integer maxHour) {
+        LocalTime from = Objects.nonNull(minHour) ? LocalTime.of(minHour, 0, 0) : null;
+        LocalTime to = Objects.nonNull(maxHour) ? LocalTime.of(maxHour, 0, 0) : null;
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .timeFrom(from)
+                .timeTo(to)
+                .build();
+
+        LocalTime expectedFrom = Objects.nonNull(minHour) ? from : Context.DEFAULT_LOCAL_TIME_FROM;
+        LocalTime expectedTo = Objects.nonNull(maxHour) ? to : Context.DEFAULT_LOCAL_TIME_TO;
+
+        Context context = createContext(config);
+        assertEquals(expectedFrom, context.getTimeFrom());
+        assertEquals(expectedTo, context.getTimeTo());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"10,1"})
+    void shouldThrowException_whenInvalidLocalTimeFromTo(Integer minHour, Integer maxHour) {
+        LocalTime from = LocalTime.of(minHour, 0, 0);
+        LocalTime to = LocalTime.of(maxHour, 0, 0);
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .timeFrom(from)
+                .timeTo(to)
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,2000", "2000,null", "2000,2100"}, nullValues = {"null"})
+    void shouldReturnContext_whenLocalDateTimeFromTo(Integer yearFrom, Integer yearTo) {
+        LocalDateTime from = Objects.nonNull(yearFrom)
+                ? LocalDateTime.of(yearFrom, 1, 1, 1, 0, 0) : null;
+        LocalDateTime to = Objects.nonNull(yearTo)
+                ? LocalDateTime.of(yearTo, 12, 31, 23, 59, 59) : null;
+
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .dateTimeFrom(from)
+                .dateTimeTo(to)
+                .build();
+
+        LocalDateTime expectedFrom = Objects.nonNull(yearFrom) ? from : Context.DEFAULT_LOCAL_DATE_TIME_FROM;
+        LocalDateTime expectedTo = Objects.nonNull(yearTo) ? to : Context.DEFAULT_LOCAL_DATE_TIME_TO;
+
+        Context context = createContext(config);
+        assertEquals(expectedFrom, context.getDateTimeFrom());
+        assertEquals(expectedTo, context.getDateTimeTo());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,1000", "4000,null", "2000,1900"}, nullValues = {"null"})
+    void shouldThrowException_whenInvalidLocalDateTimeFromTo(Integer yearFrom, Integer yearTo) {
+        LocalDateTime from = Objects.nonNull(yearFrom)
+                ? LocalDateTime.of(yearFrom, 1, 1, 1, 0, 0) : null;
+        LocalDateTime to = Objects.nonNull(yearTo)
+                ? LocalDateTime.of(yearTo, 12, 31, 23, 59, 59) : null;
+
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .dateTimeFrom(from)
+                .dateTimeTo(to)
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,10", "1,5", "-10,-1", "-10,10"}, nullValues = {"null"})
+    void shouldReturnContext_whenDurationFromTo(Integer dayFrom, Integer dayTo) {
+        Duration durationFrom = Objects.nonNull(dayFrom) ? Duration.ofDays(dayFrom) : null;
+        Duration durationTo = Objects.nonNull(dayTo) ? Duration.ofDays(dayTo) : null;
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .durationFrom(durationFrom)
+                .durationTo(durationTo)
+                .build();
+
+        Duration expectedFrom = Objects.nonNull(dayFrom) ? durationFrom : Context.DEFAULT_DURATION_FROM;
+        Duration expectedTo = Objects.nonNull(dayTo) ? durationTo : Context.DEFAULT_DURATION_TO;
+
+        Context context = createContext(config);
+        assertEquals(expectedFrom, context.getDurationFrom());
+        assertEquals(expectedTo, context.getDurationTo());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,-5", "1000, null", "5,1"}, nullValues = {"null"})
+    void shouldThrowException_whenInvalidDurationFromTo(Integer DayFrom, Integer Dayto) {
+        Duration durationFrom = Objects.nonNull(DayFrom) ? Duration.ofDays(DayFrom) : null;
+        Duration durationTo = Objects.nonNull(Dayto) ? Duration.ofDays(Dayto) : null;
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .durationFrom(durationFrom)
+                .durationTo(durationTo)
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,10", "1,5"}, nullValues = {"null"})
+    void shouldReturnContext_whenStringLengthMaxMin(Integer min, Integer max) {
         JsonGeneratorConfig config = JsonGeneratorConfig.builder()
                 .stringLengthMin(min)
-                .StringLengthMax(max)
+                .stringLengthMax(max)
                 .build();
+
+        Integer expectedMin = Objects.nonNull(min) ? min : Context.DEFAULT_STRING_LENGTH_MIN;
+        Integer expectedMax = Objects.nonNull(max) ? max : Context.DEFAULT_STRING_LENGTH_MAX;
+
         Context context = createContext(config);
-        assertEquals(min, context.getStringLengthMin());
-        assertEquals(max, context.getStringLengthMax());
+        assertEquals(expectedMin, context.getStringLengthMin());
+        assertEquals(expectedMax, context.getStringLengthMax());
     }
 
-    @Test
-    void shouldReturnContext_whenLocalDateTimeFromTo() {
-        LocalDateTime min = LocalDateTime.MIN;
-        LocalDateTime max = LocalDateTime.MAX;
+    @ParameterizedTest
+    @CsvSource(value = {"null,1", "100,null", "10,1", "-5,5", "-5,-1"}, nullValues = {"null"})
+    void shouldThrowException_whenInvalidStringLengthMaxMi(Integer min, Integer max) {
         JsonGeneratorConfig config = JsonGeneratorConfig.builder()
-                .dateTimeFrom(min)
-                .dateTimeTo(max)
+                .stringLengthMin(min)
+                .stringLengthMax(max)
                 .build();
-        Context context = createContext(config);
-        assertEquals(min, context.getDateTimeFrom());
-        assertEquals(max, context.getDateTimeTo());
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
     }
 
-    @Test
-    void shouldReturnContext_whenLocalDateFromTo() {
-        LocalDate min = LocalDate.MIN;
-        LocalDate max = LocalDate.MAX;
-        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
-                .dateFrom(min)
-                .dateTo(max)
-                .build();
-        Context context = createContext(config);
-        assertEquals(min, context.getDateFrom());
-        assertEquals(max, context.getDateTo());
-    }
-
-    @Test
-    void shouldReturnContext_whenLocalTimeFromTo() {
-        LocalTime min = LocalTime.MIN;
-        LocalTime max = LocalTime.MAX;
-        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
-                .timeFrom(min)
-                .timeTo(max)
-                .build();
-        Context context = createContext(config);
-        assertEquals(min, context.getTimeFrom());
-        assertEquals(max, context.getTimeTo());
-    }
-
-    @Test
-    void shouldReturnContext_whenDurationFromTo() {
-        Duration min = Duration.ofDays(90);
-        Duration max = Duration.ofDays(100);
-        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
-                .durationFrom(min)
-                .durationTo(max)
-                .build();
-        Context context = createContext(config);
-        assertEquals(min, context.getDurationFrom());
-        assertEquals(max, context.getDurationTo());
-    }
-
-    @Test
-    void shouldReturnContext_whenNumberMaxMin() {
-        Number min = 10;
-        Number max = 100;
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,10", "1,5", "-10,-1", "-10,10"}, nullValues = {"null"})
+    void shouldReturnContext_whenNumberMaxMin(Integer min, Integer max) {
         JsonGeneratorConfig config = JsonGeneratorConfig.builder()
                 .numberMin(min)
                 .numberMax(max)
                 .build();
+
+        Integer expectedMin = Objects.nonNull(min) ? min : Context.DEFAULT_NUMBER_MIN;
+        Integer expectedMax = Objects.nonNull(max) ? max : Context.DEFAULT_NUMBER_MAX;
+
         Context context = createContext(config);
-        assertEquals(min, context.getNumberMin());
-        assertEquals(max, context.getNumberMax());
+        assertEquals(expectedMin, context.getNumberMin());
+        assertEquals(expectedMax, context.getNumberMax());
     }
 
-    @Test
-    void shouldReturnContext_whenArrayItemsMaxMin() {
-        int min = 10;
-        int max = 100;
+    @ParameterizedTest
+    @CsvSource(value = {"null,-5", "5,1"}, nullValues = {"null"})
+    void shouldThrowException_whenInvalidNumberMaxMin(Integer min, Integer max) {
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .numberMin(min)
+                .numberMax(max)
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"null,null", "null,10", "1,5"}, nullValues = {"null"})
+    void shouldReturnContext_whenArrayItemsMaxMin(Integer min, Integer max) {
         JsonGeneratorConfig config = JsonGeneratorConfig.builder()
                 .arrayItemsMin(min)
                 .arrayItemsMax(max)
                 .build();
+
+        Integer expectedMin = Objects.nonNull(min) ? min : Context.DEFAULT_ARRAY_ITEMS_MIN;
+        Integer expectedMax = Objects.nonNull(max) ? max : Context.DEFAULT_ARRAY_ITEMS_MAX;
+
         Context context = createContext(config);
-        assertEquals(min, context.getArrayItemsMin());
-        assertEquals(max, context.getArrayItemsMax());
+        assertEquals(expectedMin, context.getArrayItemsMin());
+        assertEquals(expectedMax, context.getArrayItemsMax());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"100, null", "null,-5", "5,1", "-5,0", "-10,-5"}, nullValues = {"null"})
+    void shouldThrowException_whenInvalidArrayItemsMaxMin(Integer min, Integer max) {
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .arrayItemsMin(min)
+                .arrayItemsMax(max)
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> createContext(config));
     }
 
 }

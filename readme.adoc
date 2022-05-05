@@ -1,2 +1,59 @@
 = Json Schema Content Generator
 
+Given a Json Schema, this generates a JSON payload with random or predefined data.
+
+* xref:_jason_schema_specification[]
+* xref:_maven_installation[]
+* xref:_quickstart[]
+* xref:_libraries[]
+* xref:docs/[Docs]
+** xref:docs/JsonGeneratorConfig.adoc[JsonGeneratorConfig]
+** xref:docs/Generators.adoc[Generators]
+** xref:docs/Mockneat.adoc[Mockneat]
+
+[#_jason_schema_specification]
+== Jason schema specification
+
+Supports the json schema specification link:https://json-schema.org/draft-06/json-schema-release-notes.html[draft-06] and link:https://json-schema.org/draft-07/json-schema-release-notes.html[Draft-07]
+with:
+
+* Duration format - link:https://datatracker.ietf.org/doc/html/draft-handrews-json-schema-validation-02#section-7.3.1)[RFC3339: ISO 8601 Collected ABNF]
+* UUID formats.
+
+[#_maven_installation]
+== Maven installation
+
+To import this into your project, please add the following dependency:
+
+[source]
+----
+<dependency>
+    <groupId>com.fibanez</groupId>
+    <artifactId>json-schema-content-generator</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+</dependency>
+----
+
+[#_quickstart]
+== Quickstart
+
+[source,java]
+----
+import org.json.JSONObject;
+import com.fibanez.jsonschema.content.JsonGenerator;
+
+// ...
+InputStream in = getClass().getClassLoader().getResourceAsStream("path/to/resource/schema.json");
+JSONObject jsonObject = new JsonGenerator().generate(in);
+
+String payload = jsonObject.toString();
+----
+
+[#_libraries]
+== Libraries
+
+* link:https://github.com/everit-org/json-schema[Json-schema].
+This is an implementation of the JSON Schema Draft v4, Draft v6 and Draft v7 specifications.
+It uses the org.json API (created by Douglas Crockford) for representing JSON data.
+* link:https://www.mockneat.com/start/[Mockneat].
+This is an arbitrary data-generator open-source library written in Java.

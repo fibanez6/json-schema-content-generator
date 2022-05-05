@@ -1,0 +1,297 @@
+= Generators
+
+* Schema Generators
+** xref:_object_schema_generator[]
+** xref:_array_schema_generator[]
+** xref:_string_schema_generator[]
+** xref:_number_schema_generator[]
+** xref:_boolean_schema_generator[]
+** xref:_constant_schema_generator[]
+** xref:_enum_schema_generator[]
+** xref:_reference_schema_generator[]
+** xref:_combined_schema_generator[]
+* Java Type Generators
+** xref:_string_javatype_generator[]
+** xref:_integer_javatype_generator[]
+** xref:_boolean_javatype_generator[]
+* String Format Generators
+** xref:_date_format_generator[]
+** xref:_time_format_generator[]
+** xref:_datetime_format_generator[]
+** xref:_email_format_generator[]
+** xref:_hostname_format_generator[]
+** xref:_ipv4_format_generator[]
+** xref:_ipv6_format_generator[]
+** xref:_uri_format_generator[]
+** xref:_duration_format_generator[]
+** xref:_uuid_format_generator[]
+** xref:_regex_generator[]
+
+== Schema Generators
+
+[#_object_schema_generator]
+=== Object Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/ObjectSchemaGenerator.java[java]
+[source,java]
+
+----
+ObjectSchemaGenerator generator = new ObjectSchemaGenerator()
+JSONObject result = generator.get(ObjectSchema schema, JsonNode jsonNode);
+----
+
+[#_array_schema_generator]
+=== Array Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/ArraySchemaGenerator.java[java]
+[source,java]
+
+----
+ArraySchemaGenerator generator = new ArraySchemaGenerator()
+JSONArray result = generator.get(ArraySchema schema, JsonNode jsonNode);
+----
+
+[#_string_schema_generator]
+=== String Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/ArraySchemaGenerator.java[java]
+[source,java]
+
+----
+ArraySchemaGenerator generator = new StringSchemaGenerator()
+String result = generator.get(StringSchema schema, JsonNode jsonNode);
+----
+
+[#_number_schema_generator]
+=== Number Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/NumberSchemaGenerator.java[java]
+[source,java]
+
+----
+NumberSchemaGenerator generator = new NumberSchemaGenerator()
+Number result = generator.get(NumberSchema schema, JsonNode jsonNode);
+----
+
+[#_boolean_schema_generator]
+=== Boolean Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/BooleanSchemaGenerator.java[java]
+[source,java]
+
+----
+BooleanSchemaGenerator generator = new BooleanSchemaGenerator()
+Boolean result = generator.get(BooleanSchema schema, JsonNode jsonNode);
+----
+
+[#_constant_schema_generator]
+=== Constant Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/ConstantSchemaGenerator.java[java]
+[source,java]
+
+----
+ConstantSchemaGenerator generator = new ConstantSchemaGenerator()
+Object result = generator.get(ConstSchema schema, JsonNode jsonNode);
+----
+
+[#_enum_schema_generator]
+=== Enum Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/EnumSchemaGenerator.java[java]
+[source,java]
+
+----
+EnumSchemaGenerator generator = new EnumSchemaGenerator()
+Object result = generator.get(EnumSchema schema, JsonNode jsonNode);
+----
+
+[#_reference_schema_generator]
+=== Reference Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/ReferenceSchemaGenerator.java[java]
+[source,java]
+
+----
+ReferenceSchemaGenerator generator = new ReferenceSchemaGenerator()
+Object result = generator.get(ReferenceSchema schema, JsonNode jsonNode);
+----
+
+[#_combined_schema_generator]
+=== Combined Schema Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/CombinedSchemaGenerator.java[java]
+[source,java]
+
+----
+CombinedSchemaGenerator generator = new CombinedSchemaGenerator()
+Object result = generator.get(CombinedSchema schema, JsonNode jsonNode);
+----
+
+== Java Type Generators
+
+[#_string_javatype_generator]
+=== String JavaType Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/javaType/StringGenerator.java[java]
+[source,java]
+
+----
+StringGenerator generator = new StringGenerator()
+String result = generator.get();
+String rangeResult = generator.get(Integer minLength, Integer maxLength);
+----
+
+[#_integer_javatype_generator]
+=== Integer JavaType Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/javaType/IntegerGenerator.java[java]
+[source,java]
+
+----
+IntegerGenerator generator = new IntegerGenerator()
+Integer result = generator.get();
+Integer rangeResult = generator.get(Integer min, Integer max);
+Integer multipleOfResult = generator.get(Integer min, Integer max, Integer multipleOf);
+----
+
+[#_boolean_javatype_generator]
+=== Boolean JavaType Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/javaType/BooleanGenerator.java[java]
+[source,java]
+
+----
+BooleanGenerator generator = new BooleanGenerator()
+Boolean result = generator.get();
+----
+
+== String Format Generators
+
+[#_date_format_generator]
+=== Date Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/DateFormatGenerator.java[java]
+[source,java]
+
+----
+DateFormatGenerator generator = new DateFormatGenerator()
+String result = generator.get();
+String rangeResult = generator.get(LocalDate from, LocalDate to);
+String formattedResult = generator.get(LocalDate from, LocalDate to, DateTimeFormatter formatter);
+----
+
+[#_time_format_generator]
+=== Time Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/TimeFormatGenerator.java[java]
+[source,java]
+
+----
+TimeFormatGenerator generator = new TimeFormatGenerator()
+String result = generator.get();
+String rangeResult = generator.get(LocalTime from, LocalTime to);
+String formattedResult = generator.get(LocalTime from, LocalTime to, DateTimeFormatter formatter);
+----
+
+[#_datetime_format_generator]
+=== DateTime Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/DateTimeFormatGenerator.java[java]
+[source,java]
+
+----
+DateTimeFormatGenerator generator = new DateTimeFormatGenerator()
+String result = generator.get();
+String rangeResult = generator.get(LocalDateTime from, LocalDateTime to);
+String formattedResult = generator.get(LocalDateTime from, LocalDateTime to, DateTimeFormatter formatter);
+----
+
+[#_email_format_generator]
+=== Email Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/EmailFormatGenerator.java[java]
+[source,java]
+
+----
+EmailFormatGenerator generator = new EmailFormatGenerator()
+String result = generator.get();
+----
+
+[#_hostname_format_generator]
+=== Hostname Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/HostnameFormatGenerator.java[java]
+[source,java]
+
+----
+HostnameFormatGenerator generator = new HostnameFormatGenerator()
+String result = generator.get();
+----
+
+[#_ipv4_format_generator]
+=== Ipv4 Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/Ipv4FormatGenerator.java[java]
+[source,java]
+
+----
+Ipv4FormatGenerator generator = new Ipv4FormatGenerator()
+String result = generator.get();
+----
+
+[#_ipv6_format_generator]
+=== Ipv6 Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/Ipv6FormatGenerator.java[java]
+[source,java]
+
+----
+Ipv6FormatGenerator generator = new Ipv6FormatGenerator()
+String result = generator.get();
+----
+
+[#_uri_format_generator]
+=== Uri Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/UriFormatGenerator.java[java]
+[source,java]
+
+----
+UriFormatGenerator generator = new UriFormatGenerator()
+String result = generator.get();
+----
+
+[#_duration_format_generator]
+=== Duration Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/DurationFormatGenerator.java[java]
+[source,java]
+
+----
+DurationFormatGenerator generator = new DurationFormatGenerator()
+String result = generator.get();
+String result = generator.get(Duration from, Duration to);
+----
+
+[#_uuid_format_generator]
+=== UUID Format Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/UuidFormatGenerator.java[java]
+[source,java]
+
+----
+UuidFormatGenerator generator = new UuidFormatGenerator()
+String result = generator.get();
+----
+
+[#_regex_generator]
+=== Regex Generator
+
+xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/RegexGenerator.java[java]
+[source,java]
+
+----
+RegexGenerator generator = new RegexGenerator()
+String result = generator.get(String pattern);
+----

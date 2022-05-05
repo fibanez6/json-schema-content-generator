@@ -2,6 +2,7 @@ package com.fibanez.jsonschema.content.testUtil;
 
 import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.JsonGeneratorConfig;
+import com.fibanez.jsonschema.content.generator.JsonNode;
 import com.fibanez.jsonschema.content.testUtil.validator.TimeFormatValidator;
 import com.fibanez.jsonschema.content.validator.DurationFormatValidator;
 import com.fibanez.jsonschema.content.validator.UuidFormatValidator;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public final class TestUtils {
 
@@ -44,8 +48,9 @@ public final class TestUtils {
     }
 
     public static void validate(String schemaStr, JSONObject payload) {
+        assertFalse(payload.isEmpty());
         JSONObject jsonSchema = new JSONObject(new JSONTokener(schemaStr));
-        Schema schema = getSchema(jsonSchema, null);
+        Schema schema = getSchema(jsonSchema, "schemas/common/");
         validate(schema, payload);
     }
 
@@ -96,5 +101,11 @@ public final class TestUtils {
         URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
         URI uri = Objects.requireNonNull(url).toURI();
         return Path.of(uri);
+    }
+
+    public static JsonNode createJsonNode(String path, String propertyName) throws Exception {
+        Constructor constructor = JsonNode.class.getDeclaredConstructors()[0];
+        constructor.setAccessible(true);
+        return (JsonNode) constructor.newInstance(path, propertyName, false, null);
     }
 }

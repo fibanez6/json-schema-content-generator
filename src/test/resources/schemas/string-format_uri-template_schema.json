@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "uri-template": {
+      "type": "string",
+      "format": "uri-template"
+    }
+  }
+}

@@ -1,5 +1,8 @@
 package com.fibanez.jsonschema.content;
 
+import com.fibanez.jsonschema.content.generator.Generator;
+import com.fibanez.jsonschema.content.generator.javaType.CollectionGenerator;
+import com.fibanez.jsonschema.content.generator.javaType.ConstantGenerator;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,6 +11,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -20,13 +25,16 @@ public final class JsonGeneratorConfig {
     private final String definitionsPath;
 
     // for string formats
-    private final Map<String, Supplier<String>> stringFormatGenerators;
+    private final Map<String, Generator<String>> stringFormatGenerators;
 
     // for java types
-    private final Map<Class<?>, Supplier<?>> javaTypeGenerators;
+    private final Map<Class<?>, Generator<?>> javaTypeGenerators;
+
+    // for predefined property names or paths
+    private final Map<String, Supplier<?>> predefinedValueGenerators;
 
     // only generates required properties
-    private final boolean isOnlyRequiredProps;
+    private final boolean onlyRequiredProps;
 
     // string Format of the date
     private final DateTimeFormatter dateFormatter;
@@ -49,7 +57,7 @@ public final class JsonGeneratorConfig {
 
     // for strings
     private final Integer stringLengthMin;
-    private final Integer StringLengthMax;
+    private final Integer stringLengthMax;
 
     // for numbers
     private final Number numberMin;
@@ -59,25 +67,97 @@ public final class JsonGeneratorConfig {
     private final Integer arrayItemsMin;
     private final Integer arrayItemsMax;
 
-    Supplier<String> getFormatGenerator(String format) {
+    Generator<String> getFormatGenerator(String format) {
         return stringFormatGenerators.get(format);
     }
 
     @SuppressWarnings("unchecked")
-    <T> Supplier<T> getJavaTypeGenerator(Class<T> javaTypeClass) {
-        return (Supplier<T>) javaTypeGenerators.get(javaTypeClass);
+    <T> Generator<T> getJavaTypeGenerator(Class<T> javaTypeClass) {
+        return (Generator<T>) javaTypeGenerators.get(javaTypeClass);
+    }
+
+    Supplier<?> getPredefinedValueGenerators(String propertyNameOrPath) {
+        return predefinedValueGenerators.get(propertyNameOrPath);
     }
 
     public static class JsonGeneratorConfigBuilder {
 
+        private Map<String, Generator<String>> stringFormatGenerators = new HashMap<>();
+        private Map<Class<?>, Generator<?>> javaTypeGenerators = new HashMap<>();
+        private Map<String, Supplier<?>> predefinedValueGenerators = new HashMap<>();
         private DateTimeFormatter dateFormatter;
         private DateTimeFormatter timeFormatter;
         private DateTimeFormatter dateTimeFormatter;
+        private boolean onlyRequiredProps;
 
-        private Map<String, Supplier<String>> stringFormatGenerators = new HashMap<>();
-        private Map<Class<?>, Supplier<?>> javaTypeGenerators = new HashMap<>();
-        private Map<String, Integer> stringLengthPropertyMin = new HashMap<>();
-        private Map<String, Integer> stringLengthPropertyMax = new HashMap<>();
+        public JsonGeneratorConfigBuilder stringFormatGenerators(Map<String, Generator<String>> generators) {
+            this.stringFormatGenerators.putAll(generators);
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder stringFormatGenerator(String format, Generator<String> generator) {
+            this.stringFormatGenerators.put(format, generator);
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder stringFormatGenerator(String format, String... values) {
+            return stringFormatGenerator(format, Arrays.asList(values));
+        }
+
+        public JsonGeneratorConfigBuilder stringFormatGenerator(String format, Collection<String> values) {
+            if (values.size() == 1) {
+                this.stringFormatGenerators.put(format, new ConstantGenerator<>(values.iterator().next()));
+            } else if (values.size() > 1) {
+                this.stringFormatGenerators.put(format, new CollectionGenerator<>(values));
+            }
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder javaTypeGenerators(Map<Class<?>, Generator<?>> generators) {
+            this.javaTypeGenerators.putAll(generators);
+            return this;
+        }
+
+        public <T> JsonGeneratorConfigBuilder javaTypeGenerator(Class<T> clazz, Generator<T> generator) {
+            this.javaTypeGenerators.put(clazz, generator);
+            return this;
+        }
+
+        public <T> JsonGeneratorConfigBuilder javaTypeGenerator(Class<T> clazz, T... values) {
+            return javaTypeGenerator(clazz, Arrays.asList(values));
+        }
+
+        public <T> JsonGeneratorConfigBuilder javaTypeGenerator(Class<T> clazz, Collection<T> values) {
+            if (values.size() == 1) {
+                this.javaTypeGenerators.put(clazz, new ConstantGenerator<>(values.iterator().next()));
+            } else if (values.size() > 1) {
+                this.javaTypeGenerators.put(clazz, new CollectionGenerator<>(values));
+            }
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder predefinedValueGenerators(Map<String, ? extends Supplier<?>> generators) {
+            this.predefinedValueGenerators.putAll(generators);
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder predefinedValueGenerator(String propertyOrPath, Supplier<?> generator) {
+            this.predefinedValueGenerators.put(propertyOrPath, generator);
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder predefinedValueGenerator(String propertyOrPath, Object... values) {
+            return predefinedValueGenerator(propertyOrPath, Arrays.asList(values));
+        }
+
+        public JsonGeneratorConfigBuilder predefinedValueGenerator(String propertyOrPath, Collection<Object> values) {
+            if (values.size() == 1) {
+                this.predefinedValueGenerators.put(propertyOrPath, new ConstantGenerator<>(values.iterator().next()));
+            } else if (values.size() > 1) {
+                this.predefinedValueGenerators.put(propertyOrPath, new CollectionGenerator<>(values));
+            }
+            return this;
+        }
 
         public JsonGeneratorConfigBuilder dateFormatter(String pattern) {
             this.dateFormatter = DateTimeFormatter.ofPattern(pattern);
@@ -94,43 +174,8 @@ public final class JsonGeneratorConfig {
             return this;
         }
 
-        public JsonGeneratorConfigBuilder stringFormatGenerator(Map<String, Supplier<String>> stringFormats) {
-            stringFormatGenerators.putAll(stringFormats);
-            return this;
-        }
-
-        public JsonGeneratorConfigBuilder stringFormatGenerator(String format, Supplier<String> generator) {
-            stringFormatGenerators.put(format, generator);
-            return this;
-        }
-
-        public <T> JsonGeneratorConfigBuilder javaTypeGenerator(Map<Class<?>, Supplier<?>> javaTypes) {
-            javaTypeGenerators.putAll(javaTypes);
-            return this;
-        }
-
-        public <T> JsonGeneratorConfigBuilder javaTypeGenerator(Class<T> javaTypeClass, Supplier<T> generator) {
-            javaTypeGenerators.put(javaTypeClass, generator);
-            return this;
-        }
-
-        public JsonGeneratorConfigBuilder stringLengthPropertyMin(Map<String, Integer> minProperties) {
-            stringLengthPropertyMin.putAll(minProperties);
-            return this;
-        }
-
-        public JsonGeneratorConfigBuilder stringLengthPropertyMin(String name, int length) {
-            stringLengthPropertyMin.put(name, length);
-            return this;
-        }
-
-        public JsonGeneratorConfigBuilder stringLengthPropertyMax(Map<String, Integer> maxProperties) {
-            stringLengthPropertyMax.putAll(maxProperties);
-            return this;
-        }
-
-        public JsonGeneratorConfigBuilder stringLengthPropertyMax(String name, int length) {
-            stringLengthPropertyMax.put(name, length);
+        public JsonGeneratorConfigBuilder onlyRequiredProps() {
+            this.onlyRequiredProps = true;
             return this;
         }
     }

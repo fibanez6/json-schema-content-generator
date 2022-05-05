@@ -6,10 +6,6 @@
     "duration": {
       "type": "string",
       "format": "duration"
-    },
-    "uuid": {
-      "type": "string",
-      "format": "uuid"
     }
   }
 }

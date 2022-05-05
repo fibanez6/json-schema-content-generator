@@ -16,18 +16,17 @@ public final class StringSchemaGenerator implements SchemaGenerator<StringSchema
     public static final String UNNAMED_FORMAT = "unnamed-format";
 
     @Override
-    public String generate(@NonNull StringSchema schema, @NonNull CrumbPath crumbPath) {
+    public String generate(@NonNull StringSchema schema, @NonNull JsonNode jsonNode) {
 
         Generator<String> generator = getGenerator(schema);
         if (generator instanceof RegexGenerator) {
             RegexGenerator regexGenerator = (RegexGenerator) generator;
             return regexGenerator.get(schema.getPattern().pattern());
-        }
-        else if (generator instanceof RangeGenerator) {
+        } else if (generator instanceof RangeGenerator) {
             @SuppressWarnings("unchecked")
             RangeGenerator<Integer, String> rangeGenerator = (RangeGenerator<Integer, String>) generator;
-            int minLength = getOrDefault(schema.getMinLength(), Context.context().getStringLengthMin());
-            int maxLength = getOrDefault(schema.getMaxLength(), Context.context().getStringLengthMax());
+            int minLength = getOrDefault(schema.getMinLength(), Context.current().getStringLengthMin());
+            int maxLength = getOrDefault(schema.getMaxLength(), Context.current().getStringLengthMax());
             return rangeGenerator.get(minLength, maxLength);
         }
 

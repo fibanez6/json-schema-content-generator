@@ -10,7 +10,7 @@ public final class StringGenerator implements JavaTypeGenerator<String>, RangeGe
 
     @Override
     public String get() {
-        Context context = Context.context();
+        Context context = Context.current();
         int minLength = context.getStringLengthMin();
         int maxLength = context.getStringLengthMax();
         return get(minLength, maxLength);

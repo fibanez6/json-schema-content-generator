@@ -11,6 +11,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.function.Predicate.not;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ReflectionUtils {
@@ -18,10 +21,12 @@ public final class ReflectionUtils {
     /**
      * @return a collection of the classes T
      */
-    public static <T> Set<Class<? extends T>> getClasses(Class<T> clazz) {
+    public static <T> Stream<Class<? extends T>> getSubClassesOf(Class<T> clazz) {
         String packageName = clazz.getPackage().getName();
         Reflections reflections = new Reflections(packageName);
-        return reflections.getSubTypesOf(clazz);
+        Set<Class<? extends T>> set = reflections.getSubTypesOf(clazz);
+        return set.stream()
+                .filter(not(ReflectionUtils::isAbstractClass).and(not(Class::isInterface)));
     }
 
     public static boolean isAbstractClass(Class<?> clazz) {

@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "or": {
+      "anyOf": [
+        {
+          "type": "number",
+          "multipleOf": 5
+        },
+        {
+          "type": "number",
+          "multipleOf": 3
+        }
+      ]
+    }
+  }
+}

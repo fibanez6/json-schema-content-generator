@@ -1,0 +1,546 @@
+= Configuration
+
+You can customize the generator behaviour with your custom generators via config,
+xref:../src/main/java/com/fibanez/jsonschema/content/JsonGeneratorConfig.java[**JsonGeneratorConfig**]
+
+[source,java]
+----
+
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+    .definitionsPath("schemas/common/")
+    // for a json path
+    .predefinedValueGenerator("$.building.name", "Stark Tower")
+    // for am array json path
+    .predefinedValueGenerator("$.person[0].name", "Stark")
+     // for all "hero" properties
+    .predefinedValueGenerator("hero", "Iron-man"))
+    // for Strings java Types
+    .javaTypeGenerator(String.class, new CustomStringGenerator())
+    // for Strings with email format
+    .stringFormatGenerator("email", new CustomEmailFormatGenerato())
+    // only required properties
+    .onlyRequiredProps()
+    .build();
+
+JSONObject jsonObject = new JsonGenerator(config).generate(schema);
+String payload = jsonObject.toString();
+----
+
+* Schema
+** xref:_definitions_path[]
+** xref:_only_required_properties[]
+* Generators
+** xref:_predefined_value_supplier[]
+** xref:_java_type_generator[]
+** xref:_string_format_generator[]
+* Boundaries
+** xref:_string_length_boundaries[]
+** xref:_number_boundaries[]
+** xref:_number_of_array_items_boundaries[]
+** xref:_date_boundaries[]
+** xref:_time_boundaries[]
+** xref:_datetime_boundaries[]
+** xref:_duration_boundaries[]
+
+== Schema
+
+[#_definitions_path]
+=== Definitions Path
+
+Configures the classpath location of the schema definitions or common references
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .definitionsPath("schemas/common/")
+                .build();
+----
+
+[#_only_required_properties]
+=== Only Required Properties
+
+Generates a json with only required properties
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .onlyRequiredProps()
+                .build();
+----
+
+== Generator
+
+[#_predefined_value_supplier]
+=== Predefined Value Supplier
+
+Given a json path or property name, the generator sets them with a predefined value.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .predefinedValueGenerators(Map<String, ? extends Supplier<?>> generators)
+                .predefinedValueGenerator(String propertyOrPath, Supplier<?> generator)
+                .predefinedValueGenerator(String propertyOrPath, Object... values)
+                .predefinedValueGenerator(String propertyOrPath, Collection<Object> values)
+                .build();
+----
+
+Sample:
+
+Given the following Json Schema
+[source,json]
+
+----
+{
+  "type": "object",
+  "properties": {
+    "firstName": {
+      "type": "string"
+    },
+    "address" : {
+      "type": "object",
+      "properties": {
+        "street-name": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+----
+
+The config could be configured like:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .predefinedValueGenerator("$.person[0].firstName", "John")
+                .predefinedValueGenerator("$.person[1].firstName", "Molly")
+                .predefinedValueGenerator("street-name", "221B Baker Street")
+                .build();
+----
+
+Result:
+
+[source,json]
+----
+{
+  "person": [
+    {
+      "firstName": "Sherlock",
+      "address" : {
+        "street-name": "221B Baker Street"
+      }
+    },
+    {
+      "firstName": "Molly",
+      "address" : {
+        "street-name": "221B Baker Street"
+      }
+    }
+  ]
+}
+----
+
+If the predefined values are contained in a list, then the generator will randomly choose one of them.
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .predefinedValueGenerator("$.person[0].firstName", "Sherlock", "Molly")
+                .predefinedValueGenerator("street-name", "221B Baker Street")
+                .build();
+----
+
+Result:
+
+[source,json]
+----
+{
+  "person": [
+    {
+      "firstName": "Sherlock or Molly",
+      "address" : {
+        "street-name": "221B Baker Street"
+      }
+    }
+  ]
+}
+----
+
+[#_java_type_generator]
+=== Java Type Generator
+
+Generate values for Java types.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .javaTypeGenerators(Map<Class<?>, Generator<?>> generators)
+                .javaTypeGenerator(Class<T> clazz, Generator<T> generator)
+                .javaTypeGenerator(Class<T> clazz, T... value)
+                .javaTypeGenerator(Class<T> clazz, Collection<T> values)
+                .build();
+----
+
+Default are:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .javaTypeGenerator(String.class, new StringGenerator())
+                    .javaTypeGenerator(Integer.class, new IntegerGenerator())
+                    .javaTypeGenerator(Boolean.class, new BooleanGenerator())
+                    .build();
+----
+
+[#_string_format_generator]
+=== String Format Generator
+
+Generate values by String format.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .stringFormatGenerators(Map<String, Generator<String>> generators)
+                .stringFormatGenerator(String format, Generator<String> generator)
+                .stringFormatGenerator(String format, String... values)
+                .stringFormatGenerator(String format, Collection<String> values)
+                .build();
+----
+
+Sample:
+
+[source,json]
+----
+{
+  "type": "object",
+  "properties": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "time": {
+      "format": "time",
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "hostname": {
+      "format": "hostname",
+      "type": "string"
+    },
+    "ipv4": {
+      "type": "string",
+      "format": "ipv4"
+    },
+    "ipv6": {
+      "type": "string",
+      "format": "ipv6"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "duration": {
+      "type": "string",
+      "format": "duration"
+    },
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}
+----
+
+Default xref:../src/main/java/com/fibanez/jsonschema/content/generator/stringFormat/[String formats generator] are:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .stringFormatGenerator("date-time", new DateTimeFormatGenerator())
+                    .stringFormatGenerator("date", new DateFormatGenerator())
+                    .stringFormatGenerator("time", new TimeFormatGenerator())
+                    .stringFormatGenerator("email", new EmailValidator())
+                    .stringFormatGenerator("hostname", new HostnameFormatGenerator())
+                    .stringFormatGenerator("ipv4", new Ipv4FormatGenerator())
+                    .stringFormatGenerator("ipv6", new Ipv6FormatGenerator())
+                    .stringFormatGenerator("uri", new UriFormatGenerator())
+                    .stringFormatGenerator("duration", new DurationFormatGenerator())
+                    .stringFormatGenerator("uuid", new UuidFormatGenerator())
+                    .build();
+----
+
+Result:
+
+[source,json]
+----
+{
+  "dateTime": "2020-01-05T18:09:58Z",
+  "date": "2014-10-31",
+  "hostname": "com",
+  "ipv4": "125.159.253.183",
+  "ipv6": "e375:9e70:1cd7:8b16:8b47:3520:5b3e:8ab0",
+  "time": "11:14:39Z",
+  "uri": "http://www.coseceugenie.com",
+  "email": "dullbrinks@hotmail.co.uk",
+  "duration": "PT190H33M54S",
+  "uuid": "31af1797-8038-44da-9e43-e2b3efc5aa4e"
+}
+----
+
+== Boundaries
+
+[#_string_length_boundaries]
+=== String length boundaries
+
+Generate Strings within a length range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .stringLengthMin(Integer minLength)
+                    .StringLengthMax(Integer maxLength)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .stringLengthMin(1)
+                    .StringLengthMax(10)
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "min-length": "A",
+  "mid-length": "ABCDE",
+  "max-length": "ABCDEFGHIJ"
+}
+----
+
+[#_number_boundaries]
+=== Number boundaries
+
+Generate Numbers within a range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .numberMin(Integer min)
+                    .numberMax(Integer max)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .numberMin(1)
+                    .numberMax(10)
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "min-value": 1,
+  "another-value": 7,
+  "max-value": 10
+}
+----
+
+[#_number_of_array_items_boundaries]
+=== Number of Array Items boundaries
+
+Generates a number of Array items within a range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .arrayItemsMin(Integer min)
+                    .arrayItemsMax(Integer max)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .arrayItemsMin(1)
+                    .arrayItemsMax(10)
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "items": [
+    { "id": "ABC" },
+    { "id": "XYZ" },
+    { "id": "LOL" }
+  ]
+}
+----
+
+Up to 10 id items
+
+[#_date_boundaries]
+=== Date boundaries
+
+Generate Dates within a range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .dateFrom(LocalDate from)
+                    .dateTo(LocalDate to)
+                    .dateFormatter(String dateTimeFormatter)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .dateFrom(LocalDate.of(1900, 1, 1))
+                    .dateTo(LocalDate.now())
+                    .dateFormatter("yyyy-MM-dd")
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "World-War-II-start-date": "1939-09-01",
+  "World-War-II-end-date": "1945-09-02"
+}
+----
+
+[#_time_boundaries]
+=== Time boundaries
+
+Generate Time within a range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .timeFrom(LocalTime from)
+                    .timeTo(LocalTime to)
+                    .timeFormatter(String dateTimeFormatter)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .timeFrom(LocalTime.of(0, 0, 0))
+                    .timeTo(LocalTime.now())
+                    .timeFormatter("HH:mm:ss")
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "start-time": "21:00:00",
+  "end-time": "22:45:00"
+}
+----
+
+[#_datetime_boundaries]
+=== DateTime boundaries
+
+Generate DateTimes within a range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .dateTimeFrom(LocalDateTime from)
+                    .dateTimeTo(LocalDateTime to)
+                    .dateTimeFormatter(String dateTimeFormatter)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .dateTimeFrom(LocalDateTime.of(1900, 0, 0, 0, 0, 0))
+                    .dateTimeTo(LocalDateTime.now())
+                    .dateTimeFormatter("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "timestamp": "2000-12-12T14:28:46Z"
+}
+----
+
+[#_duration_boundaries]
+=== Duration boundaries
+
+Generate Duration within a range.
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .durationFrom(Duration from)
+                    .durationTo(Duration to)
+                    .build()
+----
+
+Sample:
+
+[source,java]
+----
+JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                    .durationFrom(Duration.ZERO)
+                    .durationTo(Duration.ofDays(90))
+                    .build()
+----
+
+Result:
+
+[source,json]
+----
+{
+  "duration": "PT228H28M43S"
+}
+----
+

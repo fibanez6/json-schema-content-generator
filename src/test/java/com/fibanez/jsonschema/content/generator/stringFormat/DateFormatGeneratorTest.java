@@ -3,7 +3,6 @@ package com.fibanez.jsonschema.content.generator.stringFormat;
 import com.fibanez.jsonschema.content.Context;
 import org.everit.json.schema.FormatValidator;
 import org.everit.json.schema.internal.DateFormatValidator;
-import org.exparity.hamcrest.date.LocalDateMatchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,11 +10,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.createContext;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.google.common.collect.Range.closedOpen;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DateFormatGeneratorTest {
@@ -63,7 +62,6 @@ class DateFormatGeneratorTest {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate fromDate = LocalDate.parse(from, formatter);
         LocalDate toDate = LocalDate.parse(to, formatter);
-        long period = fromDate.datesUntil(toDate).count();
 
         FormatGenerator generator = new DateFormatGenerator(fromDate, toDate);
         String result = generator.get();
@@ -72,7 +70,11 @@ class DateFormatGeneratorTest {
         validationResult.ifPresent(Assertions::fail);
 
         LocalDate resultDate = LocalDate.parse(result, formatter);
-        assertThat(resultDate, LocalDateMatchers.within(period, ChronoUnit.DAYS, fromDate));
+        if (from.equals(to)) {
+            assertThat(resultDate).isEqualTo(fromDate);
+        } else {
+            assertThat(resultDate).isIn(closedOpen(fromDate, toDate));
+        }
     }
 
     @ParameterizedTest
