@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DurationFormatValidatorTest extends PatternFormatValidatorTest {
 
-    private static final String DURATION_FORMAT = "^P(?:(?:\\d+D|\\d+M(?:\\d+D)?|\\d+Y(?:\\d+M(?:\\d+D)?)?)(?:T(?:\\d+H(?:\\d+M(?:\\d+S)?)?|\\d+M(?:\\d+S)?|\\d+S))?|T(?:\\d+H(?:\\d+M(?:\\d+S)?)?|\\d+M(?:\\d+S)?|\\d+S)|\\d+W)$";
+    private static final String DURATION_FORMAT = "^P(?:(?:\\d+D|\\d+M(?:\\d+D)?|\\d+Y(?:\\d+M(?:\\d+D)?)?)(?:T(?:\\d+H(?:\\d+M(?:\\d+S)?|(?:\\d+S)?)?|\\d+M(?:\\d+S)?|\\d+S))?|T(?:\\d+H(?:\\d+M(?:\\d+S)?|(?:\\d+S)?)?|\\d+M(?:\\d+S)?|\\d+S)|\\d+W)$";
 
     public DurationFormatValidatorTest() {
         super(DURATION_FORMAT, new DurationFormatValidator());
@@ -28,7 +28,7 @@ class DurationFormatValidatorTest extends PatternFormatValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "PT0S", "PT36H", "PT1M", "P5Y", "P1DT12H" })
+    @ValueSource(strings = {"PT0S", "PT36H", "PT1M", "P5Y", "P1DT12H", "PT1H1M1S", "PT1H1M", "PT1H1S"})
     void validDuration(String duration) {
         Optional<String> validationResult = validator.validate(duration);
         validationResult.ifPresent(Assertions::fail);

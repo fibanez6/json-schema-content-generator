@@ -10,11 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.Objects;
 
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.createContext;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -32,14 +28,13 @@ class NumberSchemaGeneratorTest {
 
     @Test
     void shouldThrowException_whenNulls() {
-        assertThrows(NullPointerException.class, () -> generator.generate(null, CrumbPath.ROOT));
-//        assertThrows(NullPointerException.class, () -> generator.generate(schemaBuilder.build(), null)); // TODO
+        assertThrows(NullPointerException.class, () -> generator.generate(null, JsonNode.ROOT));
     }
 
     @Test
     void shouldReturnRandomInteger_withTypeInteger() {
         NumberSchema schema = new NumberSchema(NumberSchema.builder());
-        Number result = generator.generate(schema, CrumbPath.ROOT);
+        Number result = generator.generate(schema, JsonNode.ROOT);
         assertInstanceOf(Integer.class, result);
     }
 
@@ -49,15 +44,15 @@ class NumberSchemaGeneratorTest {
         schemaBuilder = schemaBuilder.minimum(min).maximum(max);
         NumberSchema schema = new NumberSchema(schemaBuilder);
 
-        Integer result = generator.generate(schema, CrumbPath.ROOT).intValue();
+        Integer result = generator.generate(schema, JsonNode.ROOT).intValue();
 
         Integer expectedMin = Objects.nonNull(min) ? min : Context.DEFAULT_NUMBER_MIN;
         Integer expectedMax = Objects.nonNull(max) ? max : Context.DEFAULT_NUMBER_MAX;
-        assertThat(result, is(greaterThanOrEqualTo(expectedMin)));
         if (expectedMin.equals(expectedMax)) {
-            assertThat(result, is(equalTo(expectedMax)));
+            assertThat(result).isEqualTo(expectedMax);
         } else {
-            assertThat(result, is(lessThan(expectedMax)));
+            assertThat(result).isAtLeast(expectedMin);
+            assertThat(result).isLessThan(expectedMax);
         }
     }
 
@@ -67,12 +62,12 @@ class NumberSchemaGeneratorTest {
         schemaBuilder = schemaBuilder.exclusiveMinimum(min).exclusiveMaximum(max);
         NumberSchema schema = new NumberSchema(schemaBuilder);
 
-        Integer result = generator.generate(schema, CrumbPath.ROOT).intValue();
+        Integer result = generator.generate(schema, JsonNode.ROOT).intValue();
 
         Integer expectedMin = Objects.nonNull(min) ? min : 0;
         Integer expectedMax = Objects.nonNull(max) ? max : Integer.MAX_VALUE;
-        assertThat(result, is(greaterThanOrEqualTo(expectedMin)));
-        assertThat(result, is(lessThan(expectedMax)));
+        assertThat(result).isAtLeast(expectedMin);
+        assertThat(result).isLessThan(expectedMax);
     }
 
     @ParameterizedTest
@@ -81,9 +76,9 @@ class NumberSchemaGeneratorTest {
         schemaBuilder = schemaBuilder.minimum(min).maximum(max).multipleOf(multipleOf);
         NumberSchema schema = new NumberSchema(schemaBuilder);
 
-        Integer result = generator.generate(schema, CrumbPath.ROOT).intValue();
-        assertThat(result, is(greaterThanOrEqualTo(min)));
-        assertThat(result, is(lessThan(max)));
+        Integer result = generator.generate(schema, JsonNode.ROOT).intValue();
+        assertThat(result).isAtLeast(min);
+        assertThat(result).isLessThan(max);
 
         int expectedMultipleOf = Objects.nonNull(multipleOf) ? multipleOf : 1;
         assertTrue(result % expectedMultipleOf == 0);

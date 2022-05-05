@@ -11,7 +11,7 @@ import static com.fibanez.jsonschema.content.generator.util.RandomUtils.RANDOM;
 public final class EnumSchemaGenerator implements SchemaGenerator<EnumSchema> {
 
     @Override
-    public Object generate(@NonNull EnumSchema schema, CrumbPath crumbPath) {
+    public Object generate(@NonNull EnumSchema schema, JsonNode jsonNode) {
         if (schema.getPossibleValues() == null || schema.getPossibleValues().isEmpty()) {
             return JSONObject.NULL;
         }

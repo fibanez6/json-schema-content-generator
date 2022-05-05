@@ -4,11 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -39,8 +35,8 @@ class RegexGeneratorTest {
     })
     void shouldReturnValidString_withPattern(String pattern) {
         String result = generator.get(pattern);
-        assertThat(result, is(not(isEmptyString())));
-        assertThat(result, matchesPattern(pattern));
+        assertThat(result).isNotEmpty();
+        assertThat(result).matches(pattern);
     }
 
     @Test
@@ -49,6 +45,6 @@ class RegexGeneratorTest {
         String result = generator.get(pattern);
 
         assertEquals("Hello World", result);
-        assertThat(result, matchesPattern(pattern));
+        assertThat(result).matches(pattern);
     }
 }

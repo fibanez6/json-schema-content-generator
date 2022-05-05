@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.commons.lang3.Validate.isTrue;
@@ -78,7 +78,15 @@ public final class RandomUtils {
         return RandomStringUtils.randomAlphabetic(cnt);
     }
 
-    public static <E> E nextElement(List<E> list) {
-        return list.get(nextInt(list.size()));
+    public static <E> E nextElement(Collection<E> collection) {
+        int rdn = nextInt(collection.size());
+        return collection.stream()
+                .skip(rdn)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static boolean nextBoolean() {
+        return RANDOM.nextBoolean();
     }
 }

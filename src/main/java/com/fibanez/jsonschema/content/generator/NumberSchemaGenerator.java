@@ -7,23 +7,33 @@ import com.fibanez.jsonschema.content.generator.javaType.JavaTypeGenerator;
 import lombok.NonNull;
 import org.everit.json.schema.NumberSchema;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 
 public final class NumberSchemaGenerator implements SchemaGenerator<NumberSchema> {
 
     @Override
-    public Number generate(@NonNull NumberSchema schema, CrumbPath crumbPath) {
+    public Number generate(@NonNull NumberSchema schema, JsonNode jsonNode) {
         JavaTypeGenerator<Integer> generator = Context.getJavaTypeGenerator(Integer.class);
 
-        Number minValue = getMinValue(schema).orElse(Context.context().getNumberMin());
-        Number maxValue = getMaxValue(schema).orElse(Context.context().getNumberMax());
+        Number minValue = getMinValue(schema).orElse(Context.current().getNumberMin());
+        Number maxValue = getMaxValue(schema).orElse(Context.current().getNumberMax());
 
         if (generator instanceof MultipleOfGenerator) {
             MultipleOfGenerator<Integer> numberTypeGenerator = (MultipleOfGenerator<Integer>) generator;
             Number multipleOf = getMultipleOfValue(schema).orElse(Context.DEFAULT_NUMBER_MULTIPLE_OF);
-            return numberTypeGenerator.get(minValue.intValue(), maxValue.intValue(), multipleOf.intValue());
+
+            // Check for non-multipleOf
+            Set<Number> negatedMultipleOf = getNegatedMultipleOfValue(schema);
+            if (negatedMultipleOf.isEmpty()) {
+                return numberTypeGenerator.get(minValue.intValue(), maxValue.intValue(), multipleOf.intValue());
+            } else {
+                return numberTypeGenerator.get(minValue.intValue(), maxValue.intValue(), multipleOf.intValue(), negatedMultipleOf);
+            }
+
         } else if (generator instanceof RangeGenerator) {
             RangeGenerator<Integer, Integer> numberTypeGenerator = (RangeGenerator<Integer, Integer>) generator;
             return numberTypeGenerator.get(minValue.intValue(), maxValue.intValue());
@@ -45,4 +55,10 @@ public final class NumberSchemaGenerator implements SchemaGenerator<NumberSchema
     private Optional<Number> getMultipleOfValue(NumberSchema schema) {
         return ofNullable(schema.getMultipleOf());
     }
+
+    @SuppressWarnings("unchecked")
+    private Set<Number> getNegatedMultipleOfValue(NumberSchema schema) {
+        return (Set<Number>) schema.getUnprocessedProperties().getOrDefault(Context.UNPROCESSED_NOT_MULTIPLE_OF, Collections.emptySet());
+    }
+
 }

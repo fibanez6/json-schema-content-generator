@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "shapes": {
+      "type": "object",
+      "required": [
+        "name",
+        "area"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0
+        },
+        "area": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

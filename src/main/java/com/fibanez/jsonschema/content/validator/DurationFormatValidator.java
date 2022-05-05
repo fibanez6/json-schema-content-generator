@@ -38,7 +38,7 @@ public class DurationFormatValidator extends PatternFormatValidator {
 
     private static final String DUR_SECOND = "\\d+S";
     private static final String DUR_MINUTE = "\\d+M(?:" + DUR_SECOND + ")?";
-    private static final String DUR_HOUR = "\\d+H(?:" + DUR_MINUTE + ")?";
+    private static final String DUR_HOUR = "\\d+H(?:" + DUR_MINUTE + "|(?:" + DUR_SECOND + ")?)?";
     private static final String DUR_TIME = "T(?:" + DUR_HOUR + "|" + DUR_MINUTE + "|" + DUR_SECOND + ")";
 
     private static final String DUR_DAY = "\\d+D";

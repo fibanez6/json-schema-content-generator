@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "negate": {
+      "not": {
+        "type": "string"
+      }
+    }
+  }
+}

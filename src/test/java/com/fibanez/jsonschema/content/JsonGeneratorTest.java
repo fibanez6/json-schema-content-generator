@@ -1,6 +1,7 @@
 package com.fibanez.jsonschema.content;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,9 +23,20 @@ import static com.fibanez.jsonschema.content.testUtil.TestUtils.getResourceAsStr
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.getResourcePath;
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.validate;
 import static java.util.function.Predicate.not;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JsonGeneratorTest {
+
+    private static JsonGenerator generator;
+
+    @BeforeEach
+    void setUp() {
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .definitionsPath("schemas/common/")
+                .build();
+        generator = new JsonGenerator(config);
+    }
 
     @Test
     void shouldThrowException_whenNullConfig() {
@@ -33,12 +45,12 @@ class JsonGeneratorTest {
 
     @Test
     void shouldThrowException_whenNullInputStream() {
-        assertThrows(NullPointerException.class, () -> getGenerator().generate((InputStream) null));
+        assertThrows(NullPointerException.class, () -> generator.generate((InputStream) null));
     }
 
     @Test
     void shouldThrowException_whenNullString() {
-        assertThrows(NullPointerException.class, () -> getGenerator().generate((String) null));
+        assertThrows(NullPointerException.class, () -> generator.generate((String) null));
     }
 
     @Test
@@ -47,7 +59,7 @@ class JsonGeneratorTest {
         String schema = getResource(schemaPath);
         InputStream inputStream = getResourceAsStream(schemaPath);
 
-        JSONObject jsonObject = getGenerator().generate(inputStream);
+        JSONObject jsonObject = generator.generate(inputStream);
         validate(schema, jsonObject);
     }
 
@@ -56,12 +68,40 @@ class JsonGeneratorTest {
     @MethodSource("provideSchemaResourcePath")
     void shouldGenerateJSONObject_forEachSchema(Path schemaPath) throws IOException {
         String schema = Files.readString(schemaPath);
-        JSONObject jsonObject = getGenerator().generate(schema);
+        JSONObject jsonObject = generator.generate(schema);
+        System.out.println(jsonObject.toString());
         validate(schema, jsonObject);
     }
 
-    private JsonGenerator getGenerator() {
-        return new JsonGenerator();
+    @Test
+    void shouldGenerateJSONObject_onlyRequireProps() {
+        // no required radius
+        String jsonSchema = "" +
+                "{" +
+                "  \"type\": \"object\"," +
+                "  \"additionalProperties\": false," +
+                "  \"required\": [ \"shape\" ]," +
+                "  \"properties\": {" +
+                "    \"shape\": {" +
+                "      \"type\": \"object\"," +
+                "      \"additionalProperties\": false," +
+                "      \"required\": [ \"name\", \"area\"]," +
+                "      \"properties\": {" +
+                "        \"name\": { \"type\": \"string\" }," +
+                "        \"radius\": { \"type\": \"number\", \"minimum\": 0 }," +
+                "        \"area\": { \"type\": \"number\"}" +
+                "      }" +
+                "    }" +
+                "  }" +
+                "}";
+
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .onlyRequiredProps()
+                .build();
+
+        JSONObject jsonObject = new JsonGenerator(config).generate(jsonSchema);
+        validate(jsonSchema, jsonObject);
+        assertFalse(jsonObject.getJSONObject("shape").has("radius"));
     }
 
     private static Stream<Arguments> provideSchemaResourcePath() throws IOException, URISyntaxException {

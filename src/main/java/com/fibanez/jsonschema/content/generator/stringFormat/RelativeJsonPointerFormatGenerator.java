@@ -8,7 +8,7 @@ final class RelativeJsonPointerFormatGenerator implements FormatGenerator {
 
     @Override
     public String get() {
-        throw new UnsupportedOperationException("not implemented: " + this.getClass().getCanonicalName());
+        return "0/";
     }
 
     @Override

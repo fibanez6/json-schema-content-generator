@@ -6,7 +6,7 @@ import org.everit.json.schema.ConstSchema;
 public final class ConstantSchemaGenerator implements SchemaGenerator<ConstSchema> {
 
     @Override
-    public Object generate(@NonNull ConstSchema schema, CrumbPath crumbPath) {
+    public Object generate(@NonNull ConstSchema schema, JsonNode jsonNode) {
         return schema.getPermittedValue();
     }
 

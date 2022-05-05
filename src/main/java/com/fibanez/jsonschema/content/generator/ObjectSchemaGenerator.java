@@ -13,11 +13,11 @@ import java.util.stream.Stream;
 public final class ObjectSchemaGenerator implements SchemaGenerator<ObjectSchema> {
 
     @Override
-    public Object generate(@NonNull ObjectSchema schema, @NonNull CrumbPath crumbPath) {
-        Context ctx = Context.context();
-        JSONObject jsonObject = new JSONObject();
+    public JSONObject generate(@NonNull ObjectSchema schema, @NonNull JsonNode jsonNode) {
+        Context ctx = Context.current();
         Map<String, Schema> propertySchemas = schema.getPropertySchemas();
         Stream<Map.Entry<String, Schema>> entries = propertySchemas.entrySet().stream();
+        JSONObject jsonObject = new JSONObject();
 
         if (ctx.isOnlyRequiredProps()) {
             List<String> requiredProps = schema.getRequiredProperties();
@@ -28,12 +28,11 @@ public final class ObjectSchemaGenerator implements SchemaGenerator<ObjectSchema
             Schema innerSchema = entry.getValue();
             String propertyName = entry.getKey();
 
-            CrumbPath nextCrumbPath = CrumbPath.getNext(propertyName, crumbPath);
-            Object generated = generateFrom(innerSchema, nextCrumbPath);
+            JsonNode nextJsonNode = jsonNode.getNext(propertyName);
+            Object generated = generateFrom(innerSchema, nextJsonNode);
             jsonObject.put(entry.getKey(), generated);
         });
 
         return jsonObject;
     }
-
 }

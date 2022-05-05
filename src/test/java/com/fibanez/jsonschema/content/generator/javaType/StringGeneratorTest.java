@@ -5,12 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class StringGeneratorTest {
@@ -34,7 +29,7 @@ class StringGeneratorTest {
     void shouldReturnValidString_default() {
         TestUtils.createContext();
         String result = generator.get();
-        assertThat(result, is(not(isEmptyString())));
+        assertThat(result).isNotEmpty();
     }
 
     @ParameterizedTest
@@ -42,10 +37,10 @@ class StringGeneratorTest {
     void shouldReturnValidString_byRange(int min, int max) {
         String result = generator.get(min, max);
         if (min == max) {
-            assertThat(result.length(), is(min));
+            assertThat(result).hasLength(min);
         } else {
-            assertThat(result.length(), is(greaterThanOrEqualTo(min)));
-            assertThat(result.length(), is(lessThan(max)));
+            assertThat(result.length()).isAtLeast(min);
+            assertThat(result.length()).isLessThan(max);
         }
     }
 

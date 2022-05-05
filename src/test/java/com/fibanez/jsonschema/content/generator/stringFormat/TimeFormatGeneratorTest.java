@@ -3,7 +3,6 @@ package com.fibanez.jsonschema.content.generator.stringFormat;
 import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.testUtil.validator.TimeFormatValidator;
 import org.everit.json.schema.FormatValidator;
-import org.exparity.hamcrest.date.LocalTimeMatchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,11 +10,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static com.fibanez.jsonschema.content.testUtil.TestUtils.createContext;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.google.common.collect.Range.closedOpen;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TimeFormatGeneratorTest {
@@ -61,7 +60,6 @@ class TimeFormatGeneratorTest {
 
         LocalTime fromDate = LocalTime.parse(from, formatter);
         LocalTime toDate = LocalTime.parse(to, formatter);
-        long period = fromDate.until(toDate, ChronoUnit.SECONDS);
 
         FormatGenerator generator = new TimeFormatGenerator(fromDate, toDate);
         String result = generator.get();
@@ -69,7 +67,11 @@ class TimeFormatGeneratorTest {
         Optional<String> validationResult = formatValidator.validate(result);
         validationResult.ifPresent(Assertions::fail);
         LocalTime resultDate = LocalTime.parse(result, formatter);
-        assertThat(resultDate, LocalTimeMatchers.within(period, ChronoUnit.SECONDS, fromDate));
+        if (from.equals(to)) {
+            assertThat(resultDate).isEqualTo(fromDate);
+        } else {
+            assertThat(resultDate).isIn(closedOpen(fromDate, toDate));
+        }
     }
 
     @ParameterizedTest
