@@ -54,20 +54,21 @@ public class ConditionalSchemaMerger implements SchemaMerger {
         if (elseSchema.isPresent()) {
             // 50% chance to go to if-then or else
             if (thenSchema.isPresent() && RandomUtils.nextBoolean()) {
-                schemaMerger = SchemaMerger.forSchema(thenSchema.get()).combine(ifSchema.get());
+                schemaMerger = SchemaMerger.forSchema(ifSchema.get()).combine(thenSchema.get());
             } else {
-                schemaMerger = SchemaMerger.forSchema(elseSchema.get()).not(ifSchema.get());
+                Schema blank = SchemaBuilder.forSchema(ifSchema.get().getClass()).build();
+                schemaMerger = SchemaMerger.forSchema(blank).not(ifSchema.get()).combine(elseSchema.get());
+//                schemaMerger = SchemaMerger.forSchema(elseSchema.get()).not(ifSchema.get());
             }
         }
         // 50% chance to go to if-then or nothing
         else if (thenSchema.isPresent() && RandomUtils.nextBoolean()) {
-            schemaMerger = SchemaMerger.forSchema(thenSchema.get()).combine(ifSchema.get());
+            schemaMerger = SchemaMerger.forSchema(ifSchema.get()).combine(thenSchema.get());
         }
         // Negate if-then
         else {
             Schema blank = SchemaBuilder.forSchema(ifSchema.get().getClass()).build();
-            schemaMerger = SchemaMerger.forSchema(blank)
-                    .not(ifSchema.get());
+            schemaMerger = SchemaMerger.forSchema(blank).not(ifSchema.get());
         }
         return schemaMerger;
     }

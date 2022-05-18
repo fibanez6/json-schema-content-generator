@@ -3,6 +3,7 @@ package com.fibanez.jsonschema.content.generator.schemaMerger;
 import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import lombok.Getter;
+import org.everit.json.schema.ConditionalSchema;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.StringSchema;
 
@@ -20,6 +21,9 @@ class StringSchemaMerger implements SchemaMerger {
     public StringSchemaMerger combine(Schema schema) {
         if (schema instanceof StringSchema) {
             doCombine((StringSchema) schema);
+        } else if (schema instanceof ConditionalSchema) {
+            SchemaMerger merger = SchemaMerger.forSchema(schema);
+            combine(merger.getSchema());
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema);
         }

@@ -2,41 +2,41 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "nested": {
+    "multi-nested": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 1000,
+      "maximum": 100000,
       "if": {
-        "minimum": 100
+        "minimum": 10000
       },
       "then": {
-        "multipleOf": 100
+        "multipleOf": 10000
       },
       "else": {
         "if": {
-          "minimum": 10
+          "minimum": 1000
         },
         "then": {
-          "multipleOf": 10
-        }
-      }
-    },
-    "nested-reverted": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 1000,
-      "if": {
-        "minimum": 10
-      },
-      "then": {
-        "multipleOf": 10
-      },
-      "else": {
-        "if": {
-          "minimum": 100
+          "multipleOf": 1000
         },
-        "then": {
-          "multipleOf": 100
+        "else": {
+          "if": {
+            "minimum": 100
+          },
+          "then": {
+            "multipleOf": 100
+          },
+          "else": {
+            "if": {
+              "minimum": 10
+            },
+            "then": {
+              "multipleOf": 10
+            },
+            "else": {
+              "multipleOf": 1
+            }
+          }
         }
       }
     }

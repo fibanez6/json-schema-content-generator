@@ -33,8 +33,8 @@ public class CombinedSchemaMerger implements SchemaMerger {
     private static final String ONE_OF = "oneOf";
 
     private static final List<Class<? extends Schema>> orderSchemas = Arrays.asList(
-            CombinedSchema.class,           // higher priority
-            ConditionalSchema.class,
+            ConditionalSchema.class,     // higher priority
+            CombinedSchema.class,
             NotSchema.class,
             ObjectSchema.class,
             ArraySchema.class,

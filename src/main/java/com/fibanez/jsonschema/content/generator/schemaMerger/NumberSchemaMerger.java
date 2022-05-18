@@ -2,6 +2,7 @@ package com.fibanez.jsonschema.content.generator.schemaMerger;
 
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import lombok.Getter;
+import org.everit.json.schema.ConditionalSchema;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.Schema;
 
@@ -26,6 +27,9 @@ class NumberSchemaMerger implements SchemaMerger {
     public NumberSchemaMerger combine(Schema schema) {
         if (schema instanceof NumberSchema) {
             doCombine((NumberSchema) schema);
+        } else if (schema instanceof ConditionalSchema) {
+            SchemaMerger merger = SchemaMerger.forSchema(schema);
+            combine(merger.getSchema());
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema);
         }
@@ -71,6 +75,14 @@ class NumberSchemaMerger implements SchemaMerger {
         schemaBuilder.exclusiveMaximum(schema.isExclusiveMaximum());
         schemaBuilder.requiresNumber(schema.isRequiresNumber());
         schemaBuilder.requiresInteger(schema.requiresInteger());
+
+        // Correction
+        NumberSchema current = getSchema();
+        if (current.getMinimum() != null
+                && current.getMaximum() != null
+                && compare(current.getMinimum(), current.getMaximum()) > 0) {
+            schemaBuilder.maximum(null);
+        }
     }
 
     private void doNot(NumberSchema toNegateSchema) {
