@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "street_address": {
+      "type": "string"
+    },
+    "country": {
+      "enum": [
+        "United States of America",
+        "United Kingdom",
+        "Australia"
+      ]
+    }
+  },
+  "if": {
+    "properties": {
+      "country": {
+        "const": "United Kingdom"
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "postal_code": {
+        "type": "string",
+        "pattern": "[A-Z][0-9][A-Z] [0-9][A-Z][0-9]"
+      }
+    }
+  },
+  "else": {
+    "if": {
+      "properties": {
+        "country": {
+          "const": "United States of America"
+        }
+      }
+    },
+    "then": {
+      "properties": {
+        "postal_code": {
+          "type": "string",
+          "pattern": "[0-9]{5}(-[0-9]{4})?"
+        }
+      }
+    },
+    "else": {
+      "properties": {
+        "postal_code": {
+          "type": "string",
+          "pattern": "[0-9]{5}"
+        }
+      }
+    }
+  }
+}
+

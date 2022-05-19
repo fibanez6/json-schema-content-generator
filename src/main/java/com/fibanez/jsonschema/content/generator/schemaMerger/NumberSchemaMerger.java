@@ -1,7 +1,6 @@
 package com.fibanez.jsonschema.content.generator.schemaMerger;
 
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
-import lombok.Getter;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.Schema;
 
@@ -12,8 +11,7 @@ import java.util.Set;
 
 import static com.fibanez.jsonschema.content.Context.UNPROCESSED_NOT_MULTIPLE_OF;
 
-@Getter
-class NumberSchemaMerger implements SchemaMerger {
+final class NumberSchemaMerger implements SchemaMerger {
 
     private final NumberSchema.Builder schemaBuilder;
 

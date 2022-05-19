@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "person-id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "SINGLE",
+        "MARRIED"
+      ]
+    }
+  },
+  "if": {
+    "properties": {
+      "status": {
+        "const": "SINGLE"
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "cat": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "required": [
+      "person-id",
+      "status",
+      "cat"
+    ]
+  },
+  "else": {
+    "properties": {
+      "partner": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "married-date": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "required": [
+      "person-id",
+      "status",
+      "partner"
+    ]
+  }
+}

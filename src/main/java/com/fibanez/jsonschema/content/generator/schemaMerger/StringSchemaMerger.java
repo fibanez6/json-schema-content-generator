@@ -1,12 +1,10 @@
 package com.fibanez.jsonschema.content.generator.schemaMerger;
 
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
-import lombok.Getter;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.StringSchema;
 
-@Getter
-class StringSchemaMerger implements SchemaMerger {
+final class StringSchemaMerger implements SchemaMerger {
 
     private final StringSchema.Builder schemaBuilder;
 

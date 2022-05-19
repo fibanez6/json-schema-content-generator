@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "option"
+  ],
+  "properties": {
+    "select-required-option": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text-required": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "number-required": {
+          "type": "integer"
+        }
+      }
+    },
+    "option": {
+      "enum": [
+        "OPTION_STRING",
+        "OPTION_NUMBER"
+      ]
+    }
+  },
+  "if": {
+    "properties": {
+      "option": {
+        "const": "OPTION_STRING"
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "select-required-option": {
+        "required": [
+          "text-required"
+        ]
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "select-required-option": {
+        "required": [
+          "number-required"
+        ]
+      }
+    }
+  }
+}
