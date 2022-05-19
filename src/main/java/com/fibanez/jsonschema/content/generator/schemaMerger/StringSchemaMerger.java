@@ -1,9 +1,7 @@
 package com.fibanez.jsonschema.content.generator.schemaMerger;
 
-import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import lombok.Getter;
-import org.everit.json.schema.ConditionalSchema;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.StringSchema;
 
@@ -12,18 +10,14 @@ class StringSchemaMerger implements SchemaMerger {
 
     private final StringSchema.Builder schemaBuilder;
 
-    StringSchemaMerger(StringSchema schema) {
+    StringSchemaMerger() {
         this.schemaBuilder = new StringSchema.Builder();
-        combine(schema);
     }
 
     @Override
     public StringSchemaMerger combine(Schema schema) {
         if (schema instanceof StringSchema) {
             doCombine((StringSchema) schema);
-        } else if (schema instanceof ConditionalSchema) {
-            SchemaMerger merger = SchemaMerger.forSchema(schema);
-            combine(merger.getSchema());
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema);
         }
@@ -61,36 +55,31 @@ class StringSchemaMerger implements SchemaMerger {
     private void doNot(StringSchema toNegateSchema) {
         StringSchema current = getSchema();
 
-        Integer newMinLength = negateMaxLength(current, toNegateSchema);
-        Integer newMaxLength = negateMinLength(current, toNegateSchema);
+        Integer minLength = getMinLength(current.getMinLength(), current.getMaxLength(), toNegateSchema.getMaxLength());
+        Integer maxLength = getMaxLength(minLength, current.getMaxLength(), toNegateSchema.getMinLength());
 
-        schemaBuilder.minLength(newMinLength);
-        schemaBuilder.maxLength(newMaxLength);
-
-        // Correction
-        if (newMinLength != null && newMaxLength != null && newMinLength > newMaxLength) {
-            schemaBuilder.maxLength(null);
-        }
+        schemaBuilder.minLength(minLength);
+        schemaBuilder.maxLength(maxLength);
     }
 
-    private Integer negateMinLength(StringSchema current, StringSchema toNegateSchema) {
-        if (toNegateSchema.getMinLength() == null) {
-            return current.getMaxLength();
+    private Integer getMinLength(Integer minLength, Integer maxLength, Integer minLengthNegated) {
+        if (minLengthNegated == null) {
+            return minLength;
         }
-        if (current.getMaxLength() == null) {
-            return toNegateSchema.getMinLength();
+        if (maxLength != null && minLengthNegated > maxLength) {
+            return minLength;
         }
-        return toNegateSchema.getMinLength() > 0 ? toNegateSchema.getMinLength() : 1;
+        return minLengthNegated + 1;
     }
 
-    private Integer negateMaxLength(StringSchema current, StringSchema toNegateSchema) {
-        if (toNegateSchema.getMaxLength() == null) {
-            return current.getMinLength();
+    private Integer getMaxLength(Integer minLength, Integer maxLength, Integer maxLengthNegated) {
+        if (maxLengthNegated == null) {
+            return maxLength;
         }
-        if (current.getMinLength() == null) {
-            return toNegateSchema.getMaxLength();
+        if (minLength != null && minLength > maxLengthNegated) {
+            return maxLength;
         }
-        return Math.min(toNegateSchema.getMaxLength() + 1, Context.DEFAULT_STRING_LENGTH_MAX);
+        return maxLengthNegated;
     }
 
 }

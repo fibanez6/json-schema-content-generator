@@ -2,7 +2,6 @@ package com.fibanez.jsonschema.content.generator.schemaMerger;
 
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import lombok.Getter;
-import org.everit.json.schema.ConditionalSchema;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.Schema;
 
@@ -18,18 +17,14 @@ class NumberSchemaMerger implements SchemaMerger {
 
     private final NumberSchema.Builder schemaBuilder;
 
-    NumberSchemaMerger(NumberSchema schema) {
+    NumberSchemaMerger() {
         this.schemaBuilder = new NumberSchema.Builder();
-        combine(schema);
     }
 
     @Override
     public NumberSchemaMerger combine(Schema schema) {
         if (schema instanceof NumberSchema) {
             doCombine((NumberSchema) schema);
-        } else if (schema instanceof ConditionalSchema) {
-            SchemaMerger merger = SchemaMerger.forSchema(schema);
-            combine(merger.getSchema());
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema);
         }
@@ -71,33 +66,21 @@ class NumberSchemaMerger implements SchemaMerger {
         if (unprocessedProperties != null && !unprocessedProperties.isEmpty()) {
             schemaBuilder.unprocessedProperties(unprocessedProperties);
         }
+
         schemaBuilder.exclusiveMinimum(schema.isExclusiveMinimum());
         schemaBuilder.exclusiveMaximum(schema.isExclusiveMaximum());
         schemaBuilder.requiresNumber(schema.isRequiresNumber());
         schemaBuilder.requiresInteger(schema.requiresInteger());
-
-        // Correction
-        NumberSchema current = getSchema();
-        if (current.getMinimum() != null
-                && current.getMaximum() != null
-                && compare(current.getMinimum(), current.getMaximum()) > 0) {
-            schemaBuilder.maximum(null);
-        }
     }
 
     private void doNot(NumberSchema toNegateSchema) {
         NumberSchema current = getSchema();
 
-        Number newMin = negateMax(current, toNegateSchema);
-        Number newMax = negateMin(current, toNegateSchema);
+        Number minimum = getMinNumber(current.getMinimum(), current.getMaximum(), toNegateSchema.getMaximum());
+        Number maximum = getMaxNumber(minimum, current.getMaximum(), toNegateSchema.getMinimum());
 
-        schemaBuilder.minimum(newMin);
-        schemaBuilder.maximum(newMax);
-
-        // Correction
-        if (newMin != null && newMax != null && compare(newMin, newMax) > 0) {
-            schemaBuilder.maximum(null);
-        }
+        schemaBuilder.minimum(minimum);
+        schemaBuilder.maximum(maximum);
 
         if (toNegateSchema.getMultipleOf() != null) {
             // Copy all unprocessed Props
@@ -108,25 +91,24 @@ class NumberSchemaMerger implements SchemaMerger {
 
     }
 
-    private Number negateMin(NumberSchema current, NumberSchema toNegateSchema) {
-        if (toNegateSchema.getMinimum() == null) {
-            return current.getMaximum();
+    private Number getMinNumber(Number minimum, Number maximum, Number minNegated) {
+        if (minNegated == null) {
+            return minimum;
         }
-        if (current.getMaximum() == null) {
-            return toNegateSchema.getMinimum();
+        if (maximum != null && compare(minNegated, maximum) > 0) {
+            return minimum;
         }
-        return getMin(current.getMaximum(), toNegateSchema.getMinimum());
+        return minNegated;
     }
 
-    private Number negateMax(NumberSchema current, NumberSchema toNegateSchema) {
-        if (toNegateSchema.getMaximum() == null) {
-            return current.getMinimum();
+    private Number getMaxNumber(Number minimum, Number maximum, Number maxNegated) {
+        if (maxNegated == null) {
+            return maximum;
         }
-        if (current.getMinimum() == null) {
-            return toNegateSchema.getMaximum();
+        if (minimum != null && compare(minimum, maxNegated) > 0) {
+            return maximum;
         }
-        return getMax(current.getMinimum(), toNegateSchema.getMaximum());
-
+        return maxNegated;
     }
 
     @SuppressWarnings("unchecked")
@@ -134,30 +116,6 @@ class NumberSchemaMerger implements SchemaMerger {
         unprocessed.putIfAbsent(UNPROCESSED_NOT_MULTIPLE_OF, new HashSet<>());
         Set<Number> notMultipleOfs = ((Set<Number>) unprocessed.get(UNPROCESSED_NOT_MULTIPLE_OF));
         notMultipleOfs.add(schema.getMultipleOf());
-    }
-
-    private Number getMin(Number a, Number b) {
-        if (a instanceof Double) {
-            return Math.min(a.doubleValue(), b.doubleValue());
-        } else if (a instanceof Float) {
-            return Math.min(a.floatValue(), b.floatValue());
-        } else if (a instanceof Long) {
-            return Math.min(a.longValue(), b.longValue());
-        } else {
-            return Math.min(a.intValue(), b.intValue());
-        }
-    }
-
-    private Number getMax(Number a, Number b) {
-        if (a instanceof Double) {
-            return Math.max(a.doubleValue(), b.doubleValue());
-        } else if (a instanceof Float) {
-            return Math.max(a.floatValue(), b.floatValue());
-        } else if (a instanceof Long) {
-            return Math.max(a.longValue(), b.longValue());
-        } else {
-            return Math.max(a.intValue(), b.intValue());
-        }
     }
 
     private int compare(Number a, Number b) {

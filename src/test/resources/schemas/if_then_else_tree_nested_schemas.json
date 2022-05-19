@@ -25,7 +25,7 @@
       "else": {
         "if": {
           "minimum": 500,
-          "maximum": 750
+          "maximum": 749
         },
         "then": {
           "multipleOf": 20
