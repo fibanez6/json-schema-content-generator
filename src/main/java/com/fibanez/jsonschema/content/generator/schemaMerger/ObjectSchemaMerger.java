@@ -26,7 +26,7 @@ final class ObjectSchemaMerger implements SchemaMerger {
         if (schema instanceof ObjectSchema) {
             doCombine((ObjectSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
         return this;
     }
@@ -36,7 +36,7 @@ final class ObjectSchemaMerger implements SchemaMerger {
         if (schema instanceof ObjectSchema) {
             doNot((ObjectSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
         return this;
     }

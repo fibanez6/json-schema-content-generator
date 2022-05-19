@@ -22,7 +22,7 @@ final class ConstSchemaMerger implements SchemaMerger {
         if (schema instanceof ConstSchema) {
             doCombine((ConstSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
         return this;
     }
@@ -32,7 +32,7 @@ final class ConstSchemaMerger implements SchemaMerger {
         if (schema instanceof ConstSchema) {
             doNot((ConstSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
         return this;
     }

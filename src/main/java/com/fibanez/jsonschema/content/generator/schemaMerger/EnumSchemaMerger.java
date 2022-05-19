@@ -4,6 +4,7 @@ import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import org.everit.json.schema.ConstSchema;
 import org.everit.json.schema.EnumSchema;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.StringSchema;
 
 import java.util.Collections;
 import java.util.Set;
@@ -27,8 +28,10 @@ final class EnumSchemaMerger implements SchemaMerger {
             doCombine((EnumSchema) schema);
         } else if (schema instanceof ConstSchema) {
             doCombine((ConstSchema) schema);
+        } else if (schema instanceof StringSchema) {
+            // do nothing
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
 
         return this;
@@ -41,7 +44,7 @@ final class EnumSchemaMerger implements SchemaMerger {
         } else if (schema instanceof ConstSchema) {
             doNot((ConstSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
 
         return this;

@@ -17,7 +17,7 @@ final class StringSchemaMerger implements SchemaMerger {
         if (schema instanceof StringSchema) {
             doCombine((StringSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema);
+            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
         return this;
     }
@@ -27,7 +27,7 @@ final class StringSchemaMerger implements SchemaMerger {
         if (schema instanceof StringSchema) {
             doNot((StringSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported negate schema '%s'", schema);
+            throw new GeneratorException("Unsupported negate schema '%s'", schema.getClass());
         }
         return this;
     }
