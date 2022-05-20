@@ -5,9 +5,12 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.everit.json.schema.CombinedSchema;
 import org.everit.json.schema.ConditionalSchema;
+import org.everit.json.schema.ConstSchema;
+import org.everit.json.schema.EnumSchema;
 import org.everit.json.schema.NotSchema;
 import org.everit.json.schema.NullSchema;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.StringSchema;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +19,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.function.Predicate;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,16 +28,19 @@ public final class SchemaCombinator {
     private static final String ANY_OF = "anyOf";
     private static final String ONE_OF = "oneOf";
 
-    private static final List<Class<? extends Schema>> orderSchemas = Arrays.asList(
-            ConditionalSchema.class,
-            CombinedSchema.class
+    private static final List<Class<? extends Schema>> enumPriority = Arrays.asList(
+            EnumSchema.class,
+            NotSchema.class,
+            ConstSchema.class,
+            StringSchema.class
     );
+
 
     /**
      * Schemas are not in the list have higher priority and same level, and
      * Schemas contained in the list, the priority goes from top to bottom
      */
-    private static final Comparator<Schema> schemaOrderComparator = Comparator.comparingInt((Schema s) -> orderSchemas.indexOf(s.getClass()));
+    private static final Comparator<Schema> enumComparator = Comparator.comparingInt((Schema s) -> enumPriority.indexOf(s.getClass()));
 
     public static Schema combine(CombinedSchema schema) {
         List<Schema> schemasToMerge = getSubSchemasFrom(schema);
@@ -51,14 +56,17 @@ public final class SchemaCombinator {
         if (schemas.isEmpty()) {
             return NullSchema.builder().build();
         }
+
+        sortSchemas(schemas);
+
         SchemaMerger merger = SchemaMerger.forSchema(schemas.get(0));
-        schemas.forEach(subSchema -> {
+        for (Schema subSchema : schemas) {
             if (subSchema instanceof NotSchema) {
-                merger.not(((NotSchema) subSchema).getMustNotMatch());
+                merger = merger.not(((NotSchema) subSchema).getMustNotMatch());
             } else {
-                merger.combine(subSchema);
+                merger = merger.combine(subSchema);
             }
-        });
+        }
         return merger.getSchema();
     }
 
@@ -82,7 +90,7 @@ public final class SchemaCombinator {
     }
 
     /**
-     * Exactly one of the given subschemas
+     * Exactly one of the given subSchemas
      */
     private static List<Schema> oneOf(Collection<Schema> subSchemas) {
         LinkedList<Schema> orderedSchemasToProcess = new LinkedList<>();
@@ -97,7 +105,7 @@ public final class SchemaCombinator {
     }
 
     /**
-     * Any (one or more) of the given subschemas.
+     * Any (one or more) of the given subSchemas.
      */
     private static List<Schema> anyOf(Collection<Schema> subSchemas) {
         Schema candidate = RandomUtils.nextElement(subSchemas);
@@ -105,31 +113,31 @@ public final class SchemaCombinator {
     }
 
     /**
-     * All of the given subschemas.
+     * All the given subSchemas.
+     * Preserves the schema order
      */
     private static List<Schema> allOf(Collection<Schema> subSchemas) {
-        // Order by priority to merge schemas
-        PriorityQueue<Schema> prioritySchemas = new PriorityQueue<>(subSchemas.size(), schemaOrderComparator);
-        prioritySchemas.addAll(subSchemas);
+        LinkedList<Schema> queueToProcess = new LinkedList<>(subSchemas);
+        LinkedList<Schema> schemasToReturn = new LinkedList<>();
 
-        LinkedList<Schema> orderedSchemasToProcess = new LinkedList<>();
-        while (!prioritySchemas.isEmpty()) {
-            Schema subSchema = prioritySchemas.poll();
-            // Merge all schemas type oneOf, anyOf, allOf and if-then-else and push back to the queue
+        while (!queueToProcess.isEmpty()) {
+            Schema subSchema = queueToProcess.poll();
+            // Merge all schemas type of if-then-else and push back to the queue
             if (subSchema instanceof ConditionalSchema) {
                 List<Schema> schemas = getSubSchemasFrom((ConditionalSchema) subSchema);
-                schemas.forEach(prioritySchemas::offer);
+                queueToProcess.addAll(schemas);
                 continue;
             }
+            // Merge all schemas type of oneOf, anyOf and allOf and push back to the queue
             if (subSchema instanceof CombinedSchema) {
                 List<Schema> schemas = getSubSchemasFrom((CombinedSchema) subSchema);
-                schemas.forEach(prioritySchemas::offer);
+                queueToProcess.addAll(schemas);
                 continue;
             }
-            orderedSchemasToProcess.add(subSchema);
+            schemasToReturn.add(subSchema);
         }
 
-        return orderedSchemasToProcess;
+        return schemasToReturn;
     }
 
     private static List<Schema> getSubSchemasFrom(ConditionalSchema schema) {
@@ -154,6 +162,13 @@ public final class SchemaCombinator {
         else {
             NotSchema negatedIf = NotSchema.builder().mustNotMatch(ifSchema.get()).build();
             return List.of(negatedIf);
+        }
+    }
+
+    private static void sortSchemas(List<Schema> schemas) {
+        boolean containsInstance = schemas.stream().anyMatch(c -> c instanceof EnumSchema);
+        if (containsInstance) {
+            schemas.sort(enumComparator);
         }
     }
 }

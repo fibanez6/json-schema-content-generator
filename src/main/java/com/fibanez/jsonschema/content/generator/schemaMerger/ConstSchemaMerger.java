@@ -4,6 +4,7 @@ import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import org.everit.json.schema.ConstSchema;
 import org.everit.json.schema.Schema;
 
+@Deprecated
 final class ConstSchemaMerger implements SchemaMerger {
 
     private final ConstSchema.ConstSchemaBuilder schemaBuilder;
@@ -13,16 +14,16 @@ final class ConstSchemaMerger implements SchemaMerger {
     }
 
     @Override
-    public Schema getSchema() {
+    public ConstSchema getSchema() {
         return schemaBuilder.build();
     }
 
     @Override
-    public ConstSchemaMerger combine(Schema schema) {
+    public SchemaMerger combine(Schema schema) {
         if (schema instanceof ConstSchema) {
             doCombine((ConstSchema) schema);
         } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
+            return SchemaMerger.forSchema(schema).combine(getSchema());
         }
         return this;
     }

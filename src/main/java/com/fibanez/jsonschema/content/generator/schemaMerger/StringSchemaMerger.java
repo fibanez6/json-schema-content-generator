@@ -1,6 +1,8 @@
 package com.fibanez.jsonschema.content.generator.schemaMerger;
 
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
+import org.everit.json.schema.ConstSchema;
+import org.everit.json.schema.EnumSchema;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.StringSchema;
 
@@ -13,9 +15,14 @@ final class StringSchemaMerger implements SchemaMerger {
     }
 
     @Override
-    public StringSchemaMerger combine(Schema schema) {
+    public SchemaMerger combine(Schema schema) {
         if (schema instanceof StringSchema) {
             doCombine((StringSchema) schema);
+        } else if (schema instanceof EnumSchema) {
+            // StringSchema vs EnumSchema then return EnumSchema
+            return new EnumSchemaMerger().combine(schema);
+        } else if (schema instanceof ConstSchema) {
+            return new ConstSchemaMerger().combine(schema);
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }

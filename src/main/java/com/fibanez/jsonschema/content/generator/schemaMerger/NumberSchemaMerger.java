@@ -20,7 +20,7 @@ final class NumberSchemaMerger implements SchemaMerger {
     }
 
     @Override
-    public NumberSchemaMerger combine(Schema schema) {
+    public SchemaMerger combine(Schema schema) {
         if (schema instanceof NumberSchema) {
             doCombine((NumberSchema) schema);
         } else {

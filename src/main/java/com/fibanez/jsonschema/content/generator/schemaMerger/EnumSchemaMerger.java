@@ -18,17 +18,18 @@ final class EnumSchemaMerger implements SchemaMerger {
     }
 
     @Override
-    public Schema getSchema() {
+    public EnumSchema getSchema() {
         return schemaBuilder.build();
     }
 
     @Override
-    public EnumSchemaMerger combine(Schema schema) {
+    public SchemaMerger combine(Schema schema) {
         if (schema instanceof EnumSchema) {
             doCombine((EnumSchema) schema);
         } else if (schema instanceof ConstSchema) {
             doCombine((ConstSchema) schema);
         } else if (schema instanceof StringSchema) {
+            System.out.println("EnumSchemaMerger [StringSchema]");
             // do nothing
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());

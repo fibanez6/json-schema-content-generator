@@ -4,6 +4,7 @@ import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import lombok.NonNull;
 import org.everit.json.schema.ConstSchema;
 import org.everit.json.schema.EnumSchema;
+import org.everit.json.schema.NotSchema;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.Schema;
@@ -31,6 +32,8 @@ public interface SchemaMerger {
             return new ConstSchemaMerger();
         } else if (schema instanceof EnumSchema) {
             return new EnumSchemaMerger();
+        } else if (schema instanceof NotSchema) {
+            return new NotSchemaMerger();
         }
         throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
     }
