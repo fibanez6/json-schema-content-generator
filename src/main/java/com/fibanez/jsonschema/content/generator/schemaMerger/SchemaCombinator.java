@@ -5,18 +5,14 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.everit.json.schema.CombinedSchema;
 import org.everit.json.schema.ConditionalSchema;
-import org.everit.json.schema.ConstSchema;
-import org.everit.json.schema.EnumSchema;
 import org.everit.json.schema.NotSchema;
 import org.everit.json.schema.NullSchema;
 import org.everit.json.schema.Schema;
-import org.everit.json.schema.StringSchema;
 
-import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -24,23 +20,8 @@ import java.util.function.Predicate;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SchemaCombinator {
 
-    private static final String ALL_OF = "allOf";
     private static final String ANY_OF = "anyOf";
     private static final String ONE_OF = "oneOf";
-
-    private static final List<Class<? extends Schema>> enumPriority = Arrays.asList(
-            EnumSchema.class,
-            NotSchema.class,
-            ConstSchema.class,
-            StringSchema.class
-    );
-
-
-    /**
-     * Schemas are not in the list have higher priority and same level, and
-     * Schemas contained in the list, the priority goes from top to bottom
-     */
-    private static final Comparator<Schema> enumComparator = Comparator.comparingInt((Schema s) -> enumPriority.indexOf(s.getClass()));
 
     public static Schema combine(CombinedSchema schema) {
         List<Schema> schemasToMerge = getSubSchemasFrom(schema);
@@ -56,8 +37,6 @@ public final class SchemaCombinator {
         if (schemas.isEmpty()) {
             return NullSchema.builder().build();
         }
-
-        sortSchemas(schemas);
 
         SchemaMerger merger = SchemaMerger.forSchema(schemas.get(0));
         for (Schema subSchema : schemas) {
@@ -82,43 +61,46 @@ public final class SchemaCombinator {
             return oneOf(subSchemas);
         } else if (ANY_OF.equals(criterion)) {
             return anyOf(subSchemas);
-        } else if (ALL_OF.equals(criterion)) {
+        } else {
+            // if all items in the collection are conditionals, then choose one randomly.
+            boolean areAllConditionals = subSchemas.stream().allMatch(s -> s instanceof ConditionalSchema);
+            if (areAllConditionals) {
+                return oneOf(subSchemas);
+            }
             return allOf(subSchemas);
         }
-
-        return Collections.emptyList();
     }
 
     /**
      * Exactly one of the given subSchemas
      */
     private static List<Schema> oneOf(Collection<Schema> subSchemas) {
-        LinkedList<Schema> orderedSchemasToProcess = new LinkedList<>();
-        Schema candidate = RandomUtils.nextElement(subSchemas);
-        orderedSchemasToProcess.add(candidate);
+        List<Schema> schemasToReturn = new ArrayList<>();
+        Schema selected = RandomUtils.nextElement(subSchemas);
 
+        // Add selected schema and negate others
+        schemasToReturn.add(selected);
         subSchemas.stream()
-                .filter(Predicate.not(candidate::equals))
+                .filter(Predicate.not(selected::equals))
                 .map(s -> NotSchema.builder().mustNotMatch(s).build())
-                .forEach(orderedSchemasToProcess::add);
-        return orderedSchemasToProcess;
+                .forEach(schemasToReturn::add);
+        return schemasToReturn;
     }
 
     /**
      * Any (one or more) of the given subSchemas.
      */
     private static List<Schema> anyOf(Collection<Schema> subSchemas) {
-        Schema candidate = RandomUtils.nextElement(subSchemas);
-        return Collections.singletonList(candidate);
+        Schema selected = RandomUtils.nextElement(subSchemas);
+        return List.of(selected);
     }
 
     /**
      * All the given subSchemas.
-     * Preserves the schema order
      */
     private static List<Schema> allOf(Collection<Schema> subSchemas) {
-        LinkedList<Schema> queueToProcess = new LinkedList<>(subSchemas);
-        LinkedList<Schema> schemasToReturn = new LinkedList<>();
+        ArrayDeque<Schema> queueToProcess = new ArrayDeque<>(subSchemas);
+        List<Schema> schemasToReturn = new ArrayList<>();
 
         while (!queueToProcess.isEmpty()) {
             Schema subSchema = queueToProcess.poll();
@@ -162,13 +144,6 @@ public final class SchemaCombinator {
         else {
             NotSchema negatedIf = NotSchema.builder().mustNotMatch(ifSchema.get()).build();
             return List.of(negatedIf);
-        }
-    }
-
-    private static void sortSchemas(List<Schema> schemas) {
-        boolean containsInstance = schemas.stream().anyMatch(c -> c instanceof EnumSchema);
-        if (containsInstance) {
-            schemas.sort(enumComparator);
         }
     }
 }

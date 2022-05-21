@@ -4,6 +4,8 @@ import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.abstraction.MultipleOfGenerator;
 import com.fibanez.jsonschema.content.generator.abstraction.RangeGenerator;
 import com.fibanez.jsonschema.content.generator.javaType.JavaTypeGenerator;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.everit.json.schema.NumberSchema;
 
@@ -13,6 +15,7 @@ import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class NumberSchemaGenerator implements SchemaGenerator<NumberSchema> {
 
     @Override

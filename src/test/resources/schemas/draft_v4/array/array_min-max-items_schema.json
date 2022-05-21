@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "min-items": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "max-items": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "min-max-items": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": {
+        "type": "integer"
+      }
+    },
+    "min-equal-max-items": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "integer"
+      }
+    }
+  }
+}

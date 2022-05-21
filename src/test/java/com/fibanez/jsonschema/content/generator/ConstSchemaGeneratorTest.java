@@ -7,9 +7,9 @@ import static com.fibanez.jsonschema.content.testUtil.TestUtils.FIXTURE;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ConstantSchemaGeneratorTest {
+class ConstSchemaGeneratorTest {
 
-    private final ConstantSchemaGenerator generator = new ConstantSchemaGenerator();
+    private final ConstSchemaGenerator generator = new ConstSchemaGenerator();
 
     @Test
     void shouldThrowException_whenNullSchema() {

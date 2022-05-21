@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "min-max-contains": {
+      "type": "array",
+      "description": "New in draft 2019-09",
+      "contains": {
+        "type": "number"
+      },
+      "minContains": 2,
+      "maxContains": 3
+    }
+  }
+}

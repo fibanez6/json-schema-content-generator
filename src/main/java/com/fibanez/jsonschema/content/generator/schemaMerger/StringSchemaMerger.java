@@ -19,9 +19,10 @@ final class StringSchemaMerger implements SchemaMerger {
         if (schema instanceof StringSchema) {
             doCombine((StringSchema) schema);
         } else if (schema instanceof EnumSchema) {
-            // StringSchema vs EnumSchema then return EnumSchema
+            // StringSchema vs EnumSchema then returns EnumSchema
             return new EnumSchemaMerger().combine(schema);
         } else if (schema instanceof ConstSchema) {
+            // StringSchema vs ConstSchema then returns ConstSchema
             return new ConstSchemaMerger().combine(schema);
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
@@ -30,9 +31,15 @@ final class StringSchemaMerger implements SchemaMerger {
     }
 
     @Override
-    public StringSchemaMerger not(Schema schema) {
+    public SchemaMerger not(Schema schema) {
         if (schema instanceof StringSchema) {
             doNot((StringSchema) schema);
+        } else if (schema instanceof EnumSchema) {
+            // StringSchema vs EnumSchema then returns not EnumSchema
+            return new NotSchemaMerger().not(schema);
+        } else if (schema instanceof ConstSchema) {
+            // StringSchema vs ConstSchema then returns not ConstSchema
+            return new NotSchemaMerger().not(schema);
         } else {
             throw new GeneratorException("Unsupported negate schema '%s'", schema.getClass());
         }

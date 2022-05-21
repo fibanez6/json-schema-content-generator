@@ -40,10 +40,12 @@ public class Context {
     public static final String DEFAULT_INITIAL_PATH = "$";
     public static final int DEFAULT_STRING_LENGTH_MIN = 5;
     public static final int DEFAULT_STRING_LENGTH_MAX = 20;
+    public static final int DEFAULT_STRING_LENGTH_MARGIN = 10;
     public static final int DEFAULT_NUMBER_MIN = 0;
     public static final int DEFAULT_NUMBER_MAX = Integer.MAX_VALUE;
     public static final int DEFAULT_ARRAY_ITEMS_MIN = 1;
     public static final int DEFAULT_ARRAY_ITEMS_MAX = 5;
+    public static final int DEFAULT_ARRAY_ITEMS_MARGIN = 5;
     public static final Number DEFAULT_NUMBER_MULTIPLE_OF = 1;
     public static final String UNPROCESSED_NOT_MULTIPLE_OF = "NOT_MULTIPLE_OF";
     public static final LocalDate DEFAULT_LOCAL_DATE_FROM = LocalDate.of(1900, 1, 1);
@@ -88,6 +90,7 @@ public class Context {
     // for strings
     private final Integer stringLengthMin;
     private final Integer stringLengthMax;
+    private final Integer stringLengthMargin;
 
     // for numbers
     private final Number numberMin;
@@ -96,6 +99,7 @@ public class Context {
     // for array type
     private final Integer arrayItemsMin;
     private final Integer arrayItemsMax;
+    private final Integer arrayItemsMargin;
 
     // for schemas
     private final Map<Class<Schema>, SchemaGenerator<? extends Schema>> schemaGenerators;
@@ -138,6 +142,7 @@ public class Context {
         // String Generator
         this.stringLengthMin = ofNullable(config.getStringLengthMin()).orElse(DEFAULT_STRING_LENGTH_MIN);
         this.stringLengthMax = ofNullable(config.getStringLengthMax()).orElse(DEFAULT_STRING_LENGTH_MAX);
+        this.stringLengthMargin = DEFAULT_STRING_LENGTH_MARGIN;
         isTrue(stringLengthMin >= 0, "String Length Min '{}' must be higher or equal to 0", stringLengthMin);
         isTrue(stringLengthMin <= stringLengthMax, "String Length Min '{}' must be smaller or equal to String Length Max '{}'", stringLengthMin, stringLengthMax);
 
@@ -149,6 +154,7 @@ public class Context {
         // Array Generator
         this.arrayItemsMin = ofNullable(config.getArrayItemsMin()).orElse(DEFAULT_ARRAY_ITEMS_MIN);
         this.arrayItemsMax = ofNullable(config.getArrayItemsMax()).orElse(DEFAULT_ARRAY_ITEMS_MAX);
+        this.arrayItemsMargin = DEFAULT_ARRAY_ITEMS_MARGIN;
         isTrue(arrayItemsMin >= 0, "Array items Min '{}' must be higher or equal to 0", arrayItemsMin);
         isTrue(arrayItemsMin <= arrayItemsMax, "Array items Min '{}' must be smaller or equal to Array items Max '{}'", arrayItemsMin, arrayItemsMax);
 

@@ -1,9 +1,17 @@
 package com.fibanez.jsonschema.content;
 
+import com.fibanez.jsonschema.content.generator.ArraySchemaGenerator;
+import com.fibanez.jsonschema.content.generator.BooleanSchemaGenerator;
+import com.fibanez.jsonschema.content.generator.CombinedSchemaGenerator;
+import com.fibanez.jsonschema.content.generator.ConstSchemaGenerator;
+import com.fibanez.jsonschema.content.generator.EnumSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.Generator;
 import com.fibanez.jsonschema.content.generator.JsonNode;
+import com.fibanez.jsonschema.content.generator.NotSchemaGenerator;
+import com.fibanez.jsonschema.content.generator.NullSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.NumberSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.ObjectSchemaGenerator;
+import com.fibanez.jsonschema.content.generator.ReferenceSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.StringSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import com.fibanez.jsonschema.content.generator.javaType.IntegerGenerator;
@@ -12,8 +20,16 @@ import com.fibanez.jsonschema.content.generator.stringFormat.DateFormatGenerator
 import com.fibanez.jsonschema.content.generator.stringFormat.DateTimeFormatGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator.Format;
 import com.fibanez.jsonschema.content.testUtil.TestSchema;
+import org.everit.json.schema.ArraySchema;
+import org.everit.json.schema.BooleanSchema;
+import org.everit.json.schema.CombinedSchema;
+import org.everit.json.schema.ConstSchema;
+import org.everit.json.schema.EnumSchema;
+import org.everit.json.schema.NotSchema;
+import org.everit.json.schema.NullSchema;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.ObjectSchema;
+import org.everit.json.schema.ReferenceSchema;
 import org.everit.json.schema.StringSchema;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -154,9 +170,17 @@ class ContextTest {
 
     private static Stream<Arguments> provideSchemaGenerators() {
         return Stream.of(
+                Arguments.of(ArraySchema.class, ArraySchemaGenerator.class),
+                Arguments.of(BooleanSchema.class, BooleanSchemaGenerator.class),
+                Arguments.of(CombinedSchema.class, CombinedSchemaGenerator.class),
+                Arguments.of(ConstSchema.class, ConstSchemaGenerator.class),
+                Arguments.of(EnumSchema.class, EnumSchemaGenerator.class),
+                Arguments.of(NotSchema.class, NotSchemaGenerator.class),
+                Arguments.of(NullSchema.class, NullSchemaGenerator.class),
+                Arguments.of(NumberSchema.class, NumberSchemaGenerator.class),
                 Arguments.of(ObjectSchema.class, ObjectSchemaGenerator.class),
-                Arguments.of(StringSchema.class, StringSchemaGenerator.class),
-                Arguments.of(NumberSchema.class, NumberSchemaGenerator.class)
+                Arguments.of(ReferenceSchema.class, ReferenceSchemaGenerator.class),
+                Arguments.of(StringSchema.class, StringSchemaGenerator.class)
         );
     }
 

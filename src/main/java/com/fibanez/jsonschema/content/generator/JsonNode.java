@@ -35,10 +35,6 @@ public final class JsonNode {
     JsonNode getArrayNext(int index) {
         String arrayIndex = ARRAY_START_DELIMITER + index + ARRAY_END_DELIMITER;
         String arrayPath = path + arrayIndex;
-        // TODO
-//        String arrayPropertyName = Objects.isNull(propertyName)
-//                ? path + arrayIndex
-//                : propertyName + arrayIndex;
         return new JsonNode(arrayPath, propertyName, true, previous);
     }
 

@@ -1,36 +1,48 @@
 package com.fibanez.jsonschema.content.generator.schemaMerger;
 
-import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.everit.json.schema.ConstSchema;
 import org.everit.json.schema.NotSchema;
 import org.everit.json.schema.Schema;
 
-@Deprecated
+import java.util.ArrayDeque;
+
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class NotSchemaMerger implements SchemaMerger {
 
-    private final NotSchema.Builder schemaBuilder;
+    private ArrayDeque<Schema> mustNotMatchQueue = new ArrayDeque<>();
 
-    NotSchemaMerger() {
-        this.schemaBuilder = new NotSchema.Builder();
+    @Override
+    public Schema getSchema() {
+        return null;
     }
 
     @Override
     public SchemaMerger combine(Schema schema) {
-        if (schema instanceof NotSchema) {
-            Schema mustNotMatch = ((NotSchema) schema).getMustNotMatch();
-            SchemaMerger merger = SchemaMerger.forSchema(mustNotMatch);
-            return merger.not(mustNotMatch);
-        } else {
-            throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
-        }
+        return process(schema);
     }
 
     @Override
     public SchemaMerger not(Schema schema) {
-        return SchemaMerger.forSchema(schema).not(schema);
+        return process(schema);
     }
 
-    @Override
-    public NotSchema getSchema() {
-        return schemaBuilder.build();
+    /**
+     * Collect consecutive NotSchemas or ConstSchema schemas to process them later.
+     */
+    public SchemaMerger process(Schema schema) {
+        if (schema instanceof NotSchema) {
+            mustNotMatchQueue.add(((NotSchema) schema).getMustNotMatch());
+        } else if (mustNotMatchQueue.isEmpty() || schema instanceof ConstSchema) {
+            mustNotMatchQueue.add(schema);
+        } else {
+            SchemaMerger schemaMerger = SchemaMerger.forSchema(schema).combine(schema);
+            while (!mustNotMatchQueue.isEmpty()) {
+                schemaMerger = schemaMerger.not(mustNotMatchQueue.poll());
+            }
+            return schemaMerger;
+        }
+        return this;
     }
 }

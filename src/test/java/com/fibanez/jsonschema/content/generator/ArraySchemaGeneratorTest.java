@@ -48,10 +48,11 @@ class ArraySchemaGeneratorTest {
     }
 
     @Test
-    void shouldReturnEmptyArray_whenNoSchemas() {
+    void shouldReturnStringArray_whenNoSchemas() {
         ArraySchema arraySchema = ArraySchema.builder().build();
         JSONArray result = generator.generate(arraySchema, JsonNode.ROOT);
-        assertThat(result).isEmpty();
+        assertThat(result).isNotEmpty();
+        assertArrayElement(result, String.class);
     }
 
     @ParameterizedTest(name = "#{index} - Generate array of: {0}")

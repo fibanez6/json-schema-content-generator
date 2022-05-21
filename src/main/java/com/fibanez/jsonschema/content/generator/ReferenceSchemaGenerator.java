@@ -1,10 +1,13 @@
 package com.fibanez.jsonschema.content.generator;
 
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.everit.json.schema.ReferenceSchema;
 import org.everit.json.schema.Schema;
 
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class ReferenceSchemaGenerator implements SchemaGenerator<ReferenceSchema> {
 
     @Override

@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "restaurantType": {
+      "enum": [
+        "fast-food",
+        "sit-down"
+      ]
+    },
+    "total": {
+      "type": "number"
+    },
+    "tip": {
+      "type": "number"
+    }
+  },
+  "anyOf": [
+    {
+      "not": {
+        "properties": {
+          "restaurantType": {
+            "const": "sit-down"
+          }
+        },
+        "required": [
+          "restaurantType"
+        ]
+      }
+    },
+    {
+      "required": [
+        "tip"
+      ]
+    }
+  ]
+}

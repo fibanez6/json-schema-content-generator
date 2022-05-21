@@ -2,9 +2,12 @@ package com.fibanez.jsonschema.content.generator;
 
 import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.util.RandomUtils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.everit.json.schema.ArraySchema;
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.StringSchema;
 import org.json.JSONArray;
 
 import java.util.Collection;
@@ -17,6 +20,7 @@ import java.util.stream.IntStream;
 import static com.fibanez.jsonschema.content.generator.util.RandomUtils.between;
 import static org.apache.commons.lang3.Validate.isTrue;
 
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class ArraySchemaGenerator implements SchemaGenerator<ArraySchema> {
 
     private static final String DRAFT_201909_PREFIX_ITEMS = "prefixItems";
@@ -33,13 +37,14 @@ public final class ArraySchemaGenerator implements SchemaGenerator<ArraySchema> 
         Schema allItemSchema = schema.getAllItemSchema();
         if (Objects.nonNull(allItemSchema)) {
             return generateFromAllItemsSchema(allItemSchema, jsonNode, totalItems, requireUniqueItems);
+        } else {
+            Schema stringSchema = StringSchema.builder().build();
+            return generateFromAllItemsSchema(stringSchema, jsonNode, totalItems, requireUniqueItems);
         }
 
         // TODO
 //        Map<String, Object> unprocessedProperties = schema.getUnprocessedProperties();
-
-
-        return new JSONArray();
+//        return new JSONArray();
     }
 
     private JSONArray generateFromAllItemsSchema(Schema allItemSchema, JsonNode jsonNode, int totalItems, boolean requireUniqueItems) {
@@ -64,9 +69,8 @@ public final class ArraySchemaGenerator implements SchemaGenerator<ArraySchema> 
     }
 
     private int getTotalItems(ArraySchema schema) {
-        Context context = Context.current();
-        int minItems = getOrDefault(schema.getMinItems(), context.getArrayItemsMin());
-        int maxItems = getOrDefault(schema.getMaxItems(), context.getArrayItemsMax());
+        int minItems = getMinItems(schema.getMinItems(), schema.getMaxItems());
+        int maxItems = getMaxItems(minItems, schema.getMaxItems());
         isTrue(minItems >= 0, "Array items Min '{}' must be higher or equal to 0", minItems);
         return between(minItems, maxItems);
     }
@@ -78,33 +82,25 @@ public final class ArraySchemaGenerator implements SchemaGenerator<ArraySchema> 
         return Collectors.collectingAndThen(collector, JSONArray::new);
     }
 
-    // TODO
-//    private JSONArray generateFromAllItemsSchema(Schema schema, JsonNode jsonNode, int totalItems, boolean requireUniqueItems) {
-//        Collection<Object> colValues = getInitValueCollection(totalItems, requireUniqueItems);
-//        int totalLoops = totalItems * 2;
-//        while (totalLoops > 0 && colValues.size() < totalItems) {
-//            JsonNode nextJsonNode = JsonNode.getArrayNext(colValues.size(), jsonNode);
-//            Object value = generateFrom(schema, nextJsonNode);
-//            colValues.add(value);
-//            totalLoops--;
-//        }
-//        return new JSONArray(colValues);
-//    }
-//    private JSONArray generateFromItemSchemas(List<Schema> items, JsonNode jsonNode, int totalItems, boolean requireUniqueItems) {
-//        Collection<Object> colValues = getInitValueCollection(totalItems, requireUniqueItems);
-//        int totalLoops = totalItems * 2;
-//        while (totalLoops > 0 && colValues.size() < totalItems) {
-//            Schema schema = RandomUtils.nextElement(items);
-//            JsonNode nextJsonNode = JsonNode.getArrayNext(colValues.size(), jsonNode);
-//            Object value = generateFrom(schema, nextJsonNode);
-//            colValues.add(value);
-//            totalLoops--;
-//        }
-//        return new JSONArray(colValues);
-//    }
-//
-//    private Collection<Object> getInitValueCollection(int size, boolean requireUniqueItems) {
-//        return (requireUniqueItems) ? new HashSet<>(size) : new ArrayList<>(size);
-//    }
+    private int getMinItems(Integer minItems, Integer maxItems) {
+        if (minItems != null) {
+            return minItems;
+        }
+        Integer ctxMin = Context.current().getArrayItemsMin();
+        if (maxItems != null && ctxMin > maxItems) {
+            return 0;
+        }
+        return ctxMin;
+    }
 
+    private int getMaxItems(Integer minItems, Integer maxItems) {
+        if (maxItems != null) {
+            return maxItems;
+        }
+        Integer ctxMax = Context.current().getArrayItemsMax();
+        if (minItems != null && minItems > ctxMax) {
+            return minItems + Context.current().getArrayItemsMargin();
+        }
+        return ctxMax;
+    }
 }

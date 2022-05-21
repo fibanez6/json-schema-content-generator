@@ -4,6 +4,8 @@ import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.abstraction.RangeGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator.Format;
 import com.fibanez.jsonschema.content.generator.stringFormat.RegexGenerator;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.everit.json.schema.FormatValidator;
 import org.everit.json.schema.StringSchema;
@@ -11,6 +13,7 @@ import org.everit.json.schema.StringSchema;
 import java.util.Objects;
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class StringSchemaGenerator implements SchemaGenerator<StringSchema> {
 
     public static final String UNNAMED_FORMAT = "unnamed-format";
@@ -25,8 +28,8 @@ public final class StringSchemaGenerator implements SchemaGenerator<StringSchema
         } else if (generator instanceof RangeGenerator) {
             @SuppressWarnings("unchecked")
             RangeGenerator<Integer, String> rangeGenerator = (RangeGenerator<Integer, String>) generator;
-            int minLength = getOrDefault(schema.getMinLength(), Context.current().getStringLengthMin());
-            int maxLength = getOrDefault(schema.getMaxLength(), Context.current().getStringLengthMax());
+            int minLength = getMinimumLength(schema.getMinLength(), schema.getMaxLength());
+            int maxLength = getMaximumLength(minLength, schema.getMaxLength());
             return rangeGenerator.get(minLength, maxLength);
         }
 
@@ -52,6 +55,28 @@ public final class StringSchemaGenerator implements SchemaGenerator<StringSchema
             return Optional.empty();
         }
         return Optional.of(formatValidator.formatName());
+    }
+
+    private int getMinimumLength(Integer minLength, Integer maxLength) {
+        if (minLength != null) {
+            return minLength;
+        }
+        Integer ctxMin = Context.current().getStringLengthMin();
+        if (maxLength != null && ctxMin > maxLength) {
+            return 0;
+        }
+        return ctxMin;
+    }
+
+    private int getMaximumLength(Integer minLength, Integer maxLength) {
+        if (maxLength != null) {
+            return maxLength;
+        }
+        Integer ctxMax = Context.current().getStringLengthMax();
+        if (minLength != null && minLength > ctxMax) {
+            return minLength + Context.current().getStringLengthMargin();
+        }
+        return ctxMax;
     }
 
 }

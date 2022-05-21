@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "tuple-validation": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number" },
+        { "type": "string" },
+        { "enum": ["Street", "Avenue", "Boulevard"] },
+        { "enum": ["NW", "NE", "SW", "SE"] }
+      ]
+    }
+  }
+}

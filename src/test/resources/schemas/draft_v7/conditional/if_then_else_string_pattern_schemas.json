@@ -1,15 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
-    "text": {
+    "textOrNumber": {
       "type": "string",
       "if": {
-        "minLength": 2,
         "maxLength": 5
       },
       "then": {
         "pattern": "[A-F]{5}"
+      },
+      "else": {
+        "pattern": "[0-9]{10}"
       }
     }
   }

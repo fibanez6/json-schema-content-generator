@@ -29,12 +29,10 @@ final class EnumSchemaMerger implements SchemaMerger {
         } else if (schema instanceof ConstSchema) {
             doCombine((ConstSchema) schema);
         } else if (schema instanceof StringSchema) {
-            System.out.println("EnumSchemaMerger [StringSchema]");
             // do nothing
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
-
         return this;
     }
 
@@ -47,7 +45,6 @@ final class EnumSchemaMerger implements SchemaMerger {
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
-
         return this;
     }
 

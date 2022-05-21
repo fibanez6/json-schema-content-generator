@@ -1,6 +1,8 @@
 package com.fibanez.jsonschema.content.generator;
 
 import com.fibanez.jsonschema.content.Context;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.Schema;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class ObjectSchemaGenerator implements SchemaGenerator<ObjectSchema> {
 
     @Override

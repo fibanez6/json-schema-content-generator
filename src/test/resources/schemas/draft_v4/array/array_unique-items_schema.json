@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "unique-items": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "ENUM_01",
+          "ENUM_02",
+          "DUPLICATED",
+          "DUPLICATED",
+          "DUPLICATED"
+        ]
+      },
+      "uniqueItems": true
+    }
+  }
+}

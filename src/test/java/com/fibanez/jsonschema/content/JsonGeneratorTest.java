@@ -13,8 +13,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -55,7 +53,7 @@ class JsonGeneratorTest {
 
     @Test
     void shouldGenerateJSONObject_fromInputStream() {
-        String schemaPath = "schemas/simple_schema.json";
+        String schemaPath = "schemas/draft_v4/simple_schema.json";
         String schema = getResource(schemaPath);
         InputStream inputStream = getResourceAsStream(schemaPath);
 
@@ -106,17 +104,10 @@ class JsonGeneratorTest {
 
     private static Stream<Arguments> provideSchemaResourcePath() throws IOException, URISyntaxException {
         Path path = getResourcePath("schemas");
-        int pathNameCount = path.getNameCount();
-
-        Set<String> ignoreSchema = new HashSet<>();
-        ignoreSchema.add("schemas/draft_2019-09/array_schema.json");
-        ignoreSchema.add("schemas/test_schema.json");
-        ignoreSchema.add("schemas/test2_schema.json");
-
         Predicate<Path> isJsonSchema = p -> Files.isRegularFile(p) && p.getFileName().toString().endsWith(".json");
         Predicate<Path> isDraft2019_09 = p -> "draft_2019-09".equals(p.getName(p.getNameCount()-2).toString());
-        Predicate<Path> isDraft2020_12 = p -> "draft_2020-12".equals(p.getName(p.getNameCount()-2).toString());
-        Predicate<Path> isIgnoredSchema = p -> ignoreSchema.contains(p.subpath(pathNameCount-1, p.getNameCount()).toString());
+        Predicate<Path> isDraft2020_12 = p -> "draft_2020-12".equals(p.getName(p.getNameCount() - 2).toString());
+        Predicate<Path> isIgnoredSchema = p -> p.getFileName().toString().startsWith("_");
 
         return Files.walk(path)
                 .peek(System.out::println)
