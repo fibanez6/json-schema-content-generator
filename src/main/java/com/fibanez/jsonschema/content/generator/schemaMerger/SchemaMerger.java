@@ -7,6 +7,7 @@ import org.everit.json.schema.EnumSchema;
 import org.everit.json.schema.NotSchema;
 import org.everit.json.schema.NumberSchema;
 import org.everit.json.schema.ObjectSchema;
+import org.everit.json.schema.ReferenceSchema;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.StringSchema;
 
@@ -34,6 +35,8 @@ public interface SchemaMerger {
             return new EnumSchemaMerger();
         } else if (schema instanceof NotSchema) {
             return new NotSchemaMerger();
+        } else if (schema instanceof ReferenceSchema) {
+            return new ReferenceSchemaMerger();
         }
         throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
     }

@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "appointment": {
+      "type": "object",
+      "properties": {
+        "appointment-uuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "metaData": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string"
+            }
+          }
+        },
+        "patient": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "patient-id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "MARRIED",
+                    "SINGLE",
+                    "SINGLE"
+                  ]
+                },
+                "uniqueItems": true
+              },
+              "dayOfBirth": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^now([+-][0-9]+[smhdMy])?$"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[0-9]{12,14}$"
+                  }
+                ]
+              },
+              "home_address": {
+                "$ref": "#/definitions/address"
+              }
+            }
+          }
+        },
+        "appointments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "appointmentDate": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "location": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "documentChecklist": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "documentType": {
+                    "type": "string"
+                  },
+                  "documentDescription": {
+                    "type": "string"
+                  },
+                  "documentCategory": {
+                    "type": "string",
+                    "enum": [
+                      "mandatory",
+                      "optional",
+                      "required"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "billing_address": {
+          "$ref": "#/definitions/address"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "address": {
+      "type": "object",
+      "properties": {
+        "street_address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "country": {
+          "default": "United States of America",
+          "enum": [
+            "United States of America",
+            "Canada",
+            "Netherlands"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "United States of America"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "postal_code": {
+                "pattern": "[0-9]{5}(-[0-9]{4})?"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "Canada"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "properties": {
+              "postal_code": {
+                "pattern": "[A-Z][0-9][A-Z] [0-9][A-Z][0-9]"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "country": {
+                "const": "Netherlands"
+              }
+            },
+            "required": [
+              "country"
+            ]
+          },
+          "then": {
+            "properties": {
+              "postal_code": {
+                "pattern": "[0-9]{4} [A-Z]{2}"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
