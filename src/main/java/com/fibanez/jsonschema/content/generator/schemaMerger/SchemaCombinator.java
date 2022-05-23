@@ -49,28 +49,6 @@ public final class SchemaCombinator {
         return merger.getSchema();
     }
 
-    private static List<Schema> getSubSchemasFrom(CombinedSchema schema) {
-        String criterion = schema.getCriterion().toString();
-        Collection<Schema> subSchemas = schema.getSubschemas();
-
-        if (subSchemas.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        if (ONE_OF.equals(criterion)) {
-            return oneOf(subSchemas);
-        } else if (ANY_OF.equals(criterion)) {
-            return anyOf(subSchemas);
-        } else {
-            // if all items in the collection are conditionals, then choose one randomly.
-            boolean areAllConditionals = subSchemas.stream().allMatch(s -> s instanceof ConditionalSchema);
-            if (areAllConditionals) {
-                return oneOf(subSchemas);
-            }
-            return allOf(subSchemas);
-        }
-    }
-
     /**
      * Exactly one of the given subSchemas
      */
@@ -122,13 +100,35 @@ public final class SchemaCombinator {
         return schemasToReturn;
     }
 
+    private static List<Schema> getSubSchemasFrom(CombinedSchema schema) {
+        String criterion = schema.getCriterion().toString();
+        Collection<Schema> subSchemas = schema.getSubschemas();
+
+        if (subSchemas.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (ONE_OF.equals(criterion)) {
+            return oneOf(subSchemas);
+        } else if (ANY_OF.equals(criterion)) {
+            return anyOf(subSchemas);
+        } else {
+            // if all items in the collection are conditionals, then choose one randomly.
+            boolean areAllConditionals = subSchemas.stream().allMatch(s -> s instanceof ConditionalSchema);
+            if (areAllConditionals) {
+                return oneOf(subSchemas);
+            }
+            return allOf(subSchemas);
+        }
+    }
+
     private static List<Schema> getSubSchemasFrom(ConditionalSchema schema) {
         Optional<Schema> ifSchema = schema.getIfSchema();
         Optional<Schema> thenSchema = schema.getThenSchema();
         Optional<Schema> elseSchema = schema.getElseSchema();
 
         if (elseSchema.isPresent()) {
-            // 50% chance to go to if-then or else
+            // 50% chance to go to if-then or noIf-else
             if (thenSchema.isPresent() && RandomUtils.nextBoolean()) {
                 return List.of(ifSchema.get(), thenSchema.get());
             } else {
@@ -136,7 +136,7 @@ public final class SchemaCombinator {
                 return List.of(negatedIf, elseSchema.get());
             }
         }
-        // 50% chance to go to if-then or nothing
+        // 50% chance to go to if-then or noIf
         else if (thenSchema.isPresent() && RandomUtils.nextBoolean()) {
             return List.of(ifSchema.get(), thenSchema.get());
         }

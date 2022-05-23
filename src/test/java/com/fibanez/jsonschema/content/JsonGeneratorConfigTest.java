@@ -5,6 +5,7 @@ import com.fibanez.jsonschema.content.generator.javaType.CollectionGenerator;
 import com.fibanez.jsonschema.content.generator.javaType.ConstantGenerator;
 import com.fibanez.jsonschema.content.generator.javaType.JavaTypeGenerator;
 import com.fibanez.jsonschema.content.generator.javaType.StringGenerator;
+import com.fibanez.jsonschema.content.testUtil.TestContentTypeGenerator;
 import com.fibanez.jsonschema.content.testUtil.TestFormatGenerator;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +36,7 @@ class JsonGeneratorConfigTest {
         assertNull(config.getDefinitionsPath());
         assertTrue(config.getJavaTypeGenerators().isEmpty());
         assertTrue(config.getStringFormatGenerators().isEmpty());
+        assertTrue(config.getStringContentTypeGenerators().isEmpty());
         assertTrue(config.getPredefinedValueGenerators().isEmpty());
         assertFalse(config.isOnlyRequiredProps());
 
@@ -62,9 +64,9 @@ class JsonGeneratorConfigTest {
     }
 
     @Test
-    void shouldReturnConfig_putFormatGenerators() {
-        String format02 = FIXTURE.create(String.class);
+    void shouldReturnConfig_putStringFormatGenerators() {
         String format01 = FIXTURE.create(String.class);
+        String format02 = FIXTURE.create(String.class);
         String format03 = FIXTURE.create(String.class);
         String format04 = FIXTURE.create(String.class);
         String format05 = FIXTURE.create(String.class);
@@ -86,6 +88,33 @@ class JsonGeneratorConfigTest {
         assertInstanceOf(ConstantGenerator.class, config.getFormatGenerator(format03));
         assertInstanceOf(CollectionGenerator.class, config.getFormatGenerator(format04));
         assertInstanceOf(CollectionGenerator.class, config.getFormatGenerator(format05));
+    }
+
+    @Test
+    void shouldReturnConfig_putStringContentTypeGenerators() {
+        String contentType01 = FIXTURE.create(String.class);
+        String contentType02 = FIXTURE.create(String.class);
+        String contentType03 = FIXTURE.create(String.class);
+        String contentType04 = FIXTURE.create(String.class);
+        String contentType05 = FIXTURE.create(String.class);
+
+        String constValue_01 = FIXTURE.create(String.class);
+        String constValue_02 = FIXTURE.create(String.class);
+        Collection<String> colValues = FIXTURE.collections().createCollection(String.class);
+
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .stringContentTypeGenerators(Map.of(contentType01, () -> FIXTURE.create(String.class)))
+                .stringContentTypeGenerator(contentType02, new TestContentTypeGenerator())
+                .stringContentTypeGenerator(contentType03, constValue_01)
+                .stringContentTypeGenerator(contentType04, constValue_01, constValue_02)
+                .stringContentTypeGenerator(contentType05, colValues)
+                .build();
+
+        assertInstanceOf(Generator.class, config.getContentTypeGenerator(contentType01));
+        assertInstanceOf(TestContentTypeGenerator.class, config.getContentTypeGenerator(contentType02));
+        assertInstanceOf(ConstantGenerator.class, config.getContentTypeGenerator(contentType03));
+        assertInstanceOf(CollectionGenerator.class, config.getContentTypeGenerator(contentType04));
+        assertInstanceOf(CollectionGenerator.class, config.getContentTypeGenerator(contentType05));
     }
 
     @Test

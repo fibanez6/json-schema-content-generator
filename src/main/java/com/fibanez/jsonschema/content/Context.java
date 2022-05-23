@@ -3,6 +3,7 @@ package com.fibanez.jsonschema.content;
 import com.fibanez.jsonschema.content.generator.Generator;
 import com.fibanez.jsonschema.content.generator.JsonNode;
 import com.fibanez.jsonschema.content.generator.SchemaGenerator;
+import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import com.fibanez.jsonschema.content.generator.javaType.JavaTypeGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator;
@@ -107,6 +108,9 @@ public class Context {
     // for string formats
     private final Map<String, Generator<String>> stringFormatGenerators;
 
+    // for string contentType
+    private final Map<String, Generator<String>> stringContentTypeGenerators;
+
     // for java types
     private final Map<Class<?>, Generator<?>> javaTypeGenerators;
 
@@ -166,6 +170,11 @@ public class Context {
         formats.putAll(config.getStringFormatGenerators());
         this.stringFormatGenerators = Map.copyOf(formats);
 
+        // String content media type generators
+        Map<String, Generator<String>> contentType = getDefaultContentTypeGenerators();
+        contentType.putAll(config.getStringContentTypeGenerators());
+        this.stringContentTypeGenerators = Map.copyOf(contentType);
+
         // Java type generators
         Map<Class<?>, Generator<?>> javaTypes = getDefaultJavaTypeGenerators();
         javaTypes.putAll(config.getJavaTypeGenerators());
@@ -205,6 +214,19 @@ public class Context {
     }
 
     /**
+     * Read the classes in the {@link com.fibanez.jsonschema.content.generator.stringFormat} package that implement the
+     * interface {@link ContentMediaType}
+     *
+     * @return Collection of formats and their default generators
+     */
+    private Map<String, Generator<String>> getDefaultContentTypeGenerators() {
+        Stream<Class<? extends ContentMediaType>> stream = getSubClassesOf(ContentMediaType.class);
+        return stream
+                .map(c -> getDefaultInstanceOf(c, this))
+                .collect(toMap(ContentMediaType::contentMediaType, Function.identity()));
+    }
+
+    /**
      * @return Collection of Java types and their default generators
      */
     @SuppressWarnings("unchecked")
@@ -237,6 +259,14 @@ public class Context {
             return (FormatGenerator) stringFormatGenerators.get(format);
         }
         throw new GeneratorException("String format generator not found for: " + format);
+    }
+
+    public static ContentMediaType getContentMediaTypeGenerator(@NonNull String contentType) {
+        Map<String, Generator<String>> stringContentTypeGenerators = current().getStringContentTypeGenerators();
+        if (stringContentTypeGenerators.containsKey(contentType)) {
+            return (ContentMediaType) stringContentTypeGenerators.get(contentType);
+        }
+        throw new GeneratorException("String format generator not found for: " + contentType);
     }
 
     @SuppressWarnings("unchecked")

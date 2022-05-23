@@ -1,11 +1,13 @@
 package com.fibanez.jsonschema.content.generator.stringFormat;
 
 import com.fibanez.jsonschema.content.generator.Generator;
+import lombok.RequiredArgsConstructor;
 
 public interface FormatGenerator extends Generator<String> {
 
     String format();
 
+    @RequiredArgsConstructor
     enum Format {
         // Dates and times
         DATE_TIME("date-time"),
@@ -46,10 +48,6 @@ public interface FormatGenerator extends Generator<String> {
 
         public String value() {
             return value;
-        }
-
-        Format(String value) {
-            this.value = value;
         }
     }
 

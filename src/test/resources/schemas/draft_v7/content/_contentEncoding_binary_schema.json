@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "imagePng": {
+      "type": "string",
+      "contentEncoding": "binary",
+      "contentMediaType": "image/png"
+    }
+  }
+}

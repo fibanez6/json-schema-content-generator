@@ -13,6 +13,8 @@ import com.fibanez.jsonschema.content.generator.NumberSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.ObjectSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.ReferenceSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.StringSchemaGenerator;
+import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType.ContentType;
+import com.fibanez.jsonschema.content.generator.contentMediaType.ImagePngGenerator;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import com.fibanez.jsonschema.content.generator.javaType.IntegerGenerator;
 import com.fibanez.jsonschema.content.generator.javaType.StringGenerator;
@@ -96,6 +98,7 @@ class ContextTest {
 
         assertFalse(context.getSchemaGenerators().isEmpty());
         assertFalse(context.getStringFormatGenerators().isEmpty());
+        assertFalse(context.getStringContentTypeGenerators().isEmpty());
         assertFalse(context.getJavaTypeGenerators().isEmpty());
         assertFalse(context.getPredefinedValueGenerators().isEmpty());
 
@@ -208,6 +211,24 @@ class ContextTest {
     void shouldThrowException_whenFormatGeneratorNoFound() {
         createContext(defaultConfig);
         assertThrows(GeneratorException.class, () -> Context.getFormatGenerator(FIXTURE.create(String.class)));
+    }
+
+    @Test
+    void shouldReturnContext_withStringContentMediaTypeGenerators() {
+        String rndKey = FIXTURE.create(String.class);
+        JsonGeneratorConfig config = JsonGeneratorConfig.builder()
+                .stringContentTypeGenerator(rndKey, () -> FIXTURE.create(String.class))
+                .build();
+        Context context = createContext(config);
+        Map<String, Generator<String>> contentMediaTypeGenerators = context.getStringContentTypeGenerators();
+        assertInstanceOf(ImagePngGenerator.class, contentMediaTypeGenerators.get(ContentType.IMAGE_PNG.value()));
+        assertInstanceOf(Generator.class, contentMediaTypeGenerators.get(rndKey));
+    }
+
+    @Test
+    void shouldThrowException_whenContentMediaTypeGeneratorNoFound() {
+        createContext(defaultConfig);
+        assertThrows(GeneratorException.class, () -> Context.getContentMediaTypeGenerator(FIXTURE.create(String.class)));
     }
 
     @Test

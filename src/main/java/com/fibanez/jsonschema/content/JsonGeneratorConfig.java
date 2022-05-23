@@ -27,6 +27,9 @@ public final class JsonGeneratorConfig {
     // for string formats
     private final Map<String, Generator<String>> stringFormatGenerators;
 
+    // for string contentType
+    private final Map<String, Generator<String>> stringContentTypeGenerators;
+
     // for java types
     private final Map<Class<?>, Generator<?>> javaTypeGenerators;
 
@@ -71,6 +74,10 @@ public final class JsonGeneratorConfig {
         return stringFormatGenerators.get(format);
     }
 
+    Generator<String> getContentTypeGenerator(String format) {
+        return stringContentTypeGenerators.get(format);
+    }
+
     @SuppressWarnings("unchecked")
     <T> Generator<T> getJavaTypeGenerator(Class<T> javaTypeClass) {
         return (Generator<T>) javaTypeGenerators.get(javaTypeClass);
@@ -83,6 +90,7 @@ public final class JsonGeneratorConfig {
     public static class JsonGeneratorConfigBuilder {
 
         private Map<String, Generator<String>> stringFormatGenerators = new HashMap<>();
+        private Map<String, Generator<String>> stringContentTypeGenerators = new HashMap<>();
         private Map<Class<?>, Generator<?>> javaTypeGenerators = new HashMap<>();
         private Map<String, Supplier<?>> predefinedValueGenerators = new HashMap<>();
         private DateTimeFormatter dateFormatter;
@@ -109,6 +117,29 @@ public final class JsonGeneratorConfig {
                 this.stringFormatGenerators.put(format, new ConstantGenerator<>(values.iterator().next()));
             } else if (values.size() > 1) {
                 this.stringFormatGenerators.put(format, new CollectionGenerator<>(values));
+            }
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder stringContentTypeGenerators(Map<String, Generator<String>> generators) {
+            this.stringContentTypeGenerators.putAll(generators);
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder stringContentTypeGenerator(String format, Generator<String> generator) {
+            this.stringContentTypeGenerators.put(format, generator);
+            return this;
+        }
+
+        public JsonGeneratorConfigBuilder stringContentTypeGenerator(String format, String... values) {
+            return stringContentTypeGenerator(format, Arrays.asList(values));
+        }
+
+        public JsonGeneratorConfigBuilder stringContentTypeGenerator(String format, Collection<String> values) {
+            if (values.size() == 1) {
+                this.stringContentTypeGenerators.put(format, new ConstantGenerator<>(values.iterator().next()));
+            } else if (values.size() > 1) {
+                this.stringContentTypeGenerators.put(format, new CollectionGenerator<>(values));
             }
             return this;
         }

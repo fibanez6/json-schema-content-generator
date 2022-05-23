@@ -2,6 +2,8 @@ package com.fibanez.jsonschema.content.generator;
 
 import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.abstraction.RangeGenerator;
+import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType;
+import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType.Encode;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator.Format;
 import com.fibanez.jsonschema.content.generator.stringFormat.RegexGenerator;
 import lombok.AccessLevel;
@@ -10,6 +12,7 @@ import lombok.NonNull;
 import org.everit.json.schema.FormatValidator;
 import org.everit.json.schema.StringSchema;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,6 +20,8 @@ import java.util.Optional;
 public final class StringSchemaGenerator implements SchemaGenerator<StringSchema> {
 
     public static final String UNNAMED_FORMAT = "unnamed-format";
+    public static final String CONTENT_MEDIA_TYPE = "contentMediaType";
+    public static final String CONTENT_ENCODING = "contentEncoding";
 
     @Override
     public String generate(@NonNull StringSchema schema, @NonNull JsonNode jsonNode) {
@@ -31,6 +36,11 @@ public final class StringSchemaGenerator implements SchemaGenerator<StringSchema
             int minLength = getMinimumLength(schema.getMinLength(), schema.getMaxLength());
             int maxLength = getMaximumLength(minLength, schema.getMaxLength());
             return rangeGenerator.get(minLength, maxLength);
+        } else if (generator instanceof ContentMediaType) {
+            ContentMediaType contentTypeGenerator = (ContentMediaType) generator;
+            String contentEncode = (String) schema.getUnprocessedProperties().getOrDefault(CONTENT_ENCODING, Encode.UTF8.value());
+            Encode encode = Encode.getByValue(contentEncode);
+            return contentTypeGenerator.get(encode);
         }
 
         return generator.get();
@@ -44,6 +54,12 @@ public final class StringSchemaGenerator implements SchemaGenerator<StringSchema
         Optional<String> formatName = getFormatName(schema);
         if (formatName.isPresent()) {
             return Context.getFormatGenerator(formatName.get());
+        }
+
+        Map<String, Object> unprocessedProp = schema.getUnprocessedProperties();
+        if (unprocessedProp.containsKey(CONTENT_MEDIA_TYPE)) {
+            String contentType = (String) unprocessedProp.get(CONTENT_MEDIA_TYPE);
+            return Context.getContentMediaTypeGenerator(contentType);
         }
 
         return Context.getJavaTypeGenerator(String.class);
