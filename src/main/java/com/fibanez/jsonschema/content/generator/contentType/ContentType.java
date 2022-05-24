@@ -1,7 +1,6 @@
-package com.fibanez.jsonschema.content.generator.contentMediaType;
+package com.fibanez.jsonschema.content.generator.contentType;
 
 import com.fibanez.jsonschema.content.generator.Generator;
-import com.fibanez.jsonschema.content.generator.abstraction.SingleArgGenerator;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
@@ -9,14 +8,19 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public interface ContentMediaType extends Generator<String>, SingleArgGenerator<ContentMediaType.Encode, String> {
+public interface ContentType extends Generator<String> {
 
-    String contentMediaType();
+    String CONTENT_TYPE_SEPARATOR = "/";
+
+    String get(String contentType, Encode encode);
+
+    String mimeType();
 
     @RequiredArgsConstructor
-    enum ContentType {
-
-        IMAGE_PNG("image/png");
+    enum MimeType {
+        IMAGE("image/*"),
+        APPLICATION("application/*"),
+        TEXT("text/*");
 
         private final String value;
 
@@ -28,6 +32,7 @@ public interface ContentMediaType extends Generator<String>, SingleArgGenerator<
 
     @RequiredArgsConstructor
     enum Encode {
+        DEFAULT("default"),
         UTF8("utf-8"),
         BITS7("7bit"),
         BITS8("8bit"),

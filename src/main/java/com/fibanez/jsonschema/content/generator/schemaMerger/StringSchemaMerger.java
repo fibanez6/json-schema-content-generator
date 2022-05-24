@@ -62,6 +62,7 @@ final class StringSchemaMerger implements SchemaMerger {
             schemaBuilder.pattern(schema.getPattern().pattern());
         }
         schemaBuilder.requiresString(schema.requireString());
+        schemaBuilder.unprocessedProperties(schema.getUnprocessedProperties());
     }
 
     private void doNot(StringSchema toNegateSchema) {

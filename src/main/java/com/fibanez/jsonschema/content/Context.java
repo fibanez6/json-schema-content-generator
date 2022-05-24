@@ -3,7 +3,7 @@ package com.fibanez.jsonschema.content;
 import com.fibanez.jsonschema.content.generator.Generator;
 import com.fibanez.jsonschema.content.generator.JsonNode;
 import com.fibanez.jsonschema.content.generator.SchemaGenerator;
-import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType;
+import com.fibanez.jsonschema.content.generator.contentType.ContentType;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import com.fibanez.jsonschema.content.generator.javaType.JavaTypeGenerator;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator;
@@ -215,15 +215,15 @@ public class Context {
 
     /**
      * Read the classes in the {@link com.fibanez.jsonschema.content.generator.stringFormat} package that implement the
-     * interface {@link ContentMediaType}
+     * interface {@link ContentType}
      *
      * @return Collection of formats and their default generators
      */
     private Map<String, Generator<String>> getDefaultContentTypeGenerators() {
-        Stream<Class<? extends ContentMediaType>> stream = getSubClassesOf(ContentMediaType.class);
+        Stream<Class<? extends ContentType>> stream = getSubClassesOf(ContentType.class);
         return stream
                 .map(c -> getDefaultInstanceOf(c, this))
-                .collect(toMap(ContentMediaType::contentMediaType, Function.identity()));
+                .collect(toMap(ContentType::mimeType, Function.identity()));
     }
 
     /**
@@ -261,10 +261,13 @@ public class Context {
         throw new GeneratorException("String format generator not found for: " + format);
     }
 
-    public static ContentMediaType getContentMediaTypeGenerator(@NonNull String contentType) {
+    public static ContentType getContentMediaTypeGenerator(@NonNull String contentType) {
         Map<String, Generator<String>> stringContentTypeGenerators = current().getStringContentTypeGenerators();
-        if (stringContentTypeGenerators.containsKey(contentType)) {
-            return (ContentMediaType) stringContentTypeGenerators.get(contentType);
+        Optional<Map.Entry<String, Generator<String>>> entry = stringContentTypeGenerators.entrySet().stream()
+                .filter(e -> contentType.matches(e.getKey().replace("/*", "\\/.*")))
+                .findFirst();
+        if (entry.isPresent()) {
+            return (ContentType) entry.get().getValue();
         }
         throw new GeneratorException("String format generator not found for: " + contentType);
     }

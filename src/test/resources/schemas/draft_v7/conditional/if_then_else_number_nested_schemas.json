@@ -11,31 +11,31 @@
         "minimum": 10000
       },
       "then": {
-        "multipleOf": 10000
+        "multipleOf": 100
       },
       "else": {
         "if": {
           "minimum": 1000
         },
         "then": {
-          "multipleOf": 1000
+          "multipleOf": 7
         },
         "else": {
           "if": {
             "minimum": 100
           },
           "then": {
-            "multipleOf": 100
+            "multipleOf": 5
           },
           "else": {
             "if": {
               "minimum": 10
             },
             "then": {
-              "multipleOf": 10
+              "multipleOf": 2
             },
             "else": {
-              "multipleOf": 1
+              "multipleOf": 3
             }
           }
         }

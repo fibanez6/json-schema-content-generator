@@ -7,6 +7,7 @@ Given a Json Schema, this generates a JSON payload with random or predefined dat
 * xref:_quickstart[]
 * xref:_libraries[]
 * xref:docs/[Docs]
+** xref:docs/SupportedSpecs.adoc[Supported specifications]
 ** xref:docs/JsonGeneratorConfig.adoc[JsonGeneratorConfig]
 ** xref:docs/Generators.adoc[Generators]
 ** xref:docs/Mockneat.adoc[Mockneat]

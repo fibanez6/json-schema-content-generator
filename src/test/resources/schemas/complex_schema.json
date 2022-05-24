@@ -13,7 +13,7 @@
           "type": "object",
           "properties": {
             "version": {
-              "type": "string"
+              "type": "number"
             }
           }
         },
@@ -78,15 +78,25 @@
           "type": "object",
           "properties": {
             "version": {
-              "type": "string"
+              "type": "integer"
             },
             "evidence": {
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "documentType": {
-                    "type": "string"
+                  "imageFile": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "contentEncoding": "base64",
+                        "contentMediaType": "image/png"
+                      },
+                      {
+                        "type": "string",
+                        "contentMediaType": "application/pdf"
+                      }
+                    ]
                   },
                   "documentDescription": {
                     "type": "string"

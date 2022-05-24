@@ -44,7 +44,7 @@ public final class ReflectionUtils {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             return parameterizedType.getActualTypeArguments()[0];
         } catch (Exception e) {
-            throw new GeneratorException("Could not find out the class type for " + clazz.getCanonicalName(),e);
+            throw new GeneratorException(e, "Could not find out the class type for " + clazz.getCanonicalName());
         }
     }
 
@@ -68,7 +68,7 @@ public final class ReflectionUtils {
             constructors[0].setAccessible(true);
             return constructors[0].newInstance();
         } catch (Exception e) {
-            throw new GeneratorException("Could not create a instance of " + clazz.getCanonicalName(), e);
+            throw new GeneratorException(e, "Could not create a instance of " + clazz.getCanonicalName());
         }
     }
 

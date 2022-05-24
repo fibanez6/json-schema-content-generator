@@ -1,0 +1,79 @@
+= link:https://json-schema.org/understanding-json-schema/[JSON Schema Specs]
+
+* String
+** [*] Length
+** [*] Regular Expressions
+** [*] Format
+
+* Numeric
+** [*] Integer
+** [*] Number
+** [*] Multiples
+** [*] Range
+
+* Object
+** [*] Properties
+** [*] Pattern Properties
+** [*] Additional Properties
+** [*] Unevaluated Properties
+** [*] Required Properties
+** [*] Property names
+** [*] Size
+
+* Array
+** [*] Items
+** [*] Tuple validation
+** [*] Unevaluated Items
+** [*] Contains
+** [*] Length
+** [*] Uniqueness
+
+* [*] Boolean
+* [*] Null
+
+* Generic keywords
+** Annotations
+** Comments
+** [*] Enumerated values
+** [*] Constant values
+
+* Media: string-encoding non-JSON data
+** contentMediaType
+*** [*] Image/png
+*** [*] Image/jpeg
+** contentEncoding
+*** [*] Base64
+*** [*] Base32
+*** [*] Base16
+*** [*] Binary
+*** 7-bit
+*** 8-bit
+*** Quoted-printable
+*** [*] UTF-8
+** contentSchema
+
+* Schema Composition
+** [*] AllOf
+** [*] AnyOf
+** [*] OneOf
+** [*] Not
+** [*] Properties of Schema Composition
+
+* Applying SubSchemas Conditionally
+** DependentRequired
+** DependentSchemas
+** [*] If-Then-Else
+** [*] Implication
+
+* Structuring a complex schema
+** Schema Identification
+** Base URI
+*** Retrieval URI
+*** $id
+*** JSON Pointer
+*** $anchor
+** [*] $ref
+** $defs
+** Recursion
+** Extending Recursive Schemas
+** Bundling

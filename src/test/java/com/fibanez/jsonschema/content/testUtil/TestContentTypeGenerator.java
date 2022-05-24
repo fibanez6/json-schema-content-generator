@@ -1,21 +1,21 @@
 package com.fibanez.jsonschema.content.testUtil;
 
-import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType;
+import com.fibanez.jsonschema.content.generator.contentType.ContentType;
 
-public final class TestContentTypeGenerator implements ContentMediaType {
+public final class TestContentTypeGenerator implements ContentType {
 
     @Override
     public String get() {
-        return contentMediaType();
+        return mimeType();
     }
 
     @Override
-    public String get(Encode encode) {
-        return contentMediaType();
+    public String get(String contentType, Encode encode) {
+        return mimeType();
     }
 
     @Override
-    public String contentMediaType() {
+    public String mimeType() {
         return "test-content";
     }
 }

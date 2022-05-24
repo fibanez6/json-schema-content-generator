@@ -69,6 +69,7 @@ final class NumberSchemaMerger implements SchemaMerger {
         schemaBuilder.exclusiveMaximum(schema.isExclusiveMaximum());
         schemaBuilder.requiresNumber(schema.isRequiresNumber());
         schemaBuilder.requiresInteger(schema.requiresInteger());
+        schemaBuilder.unprocessedProperties(schema.getUnprocessedProperties());
     }
 
     private void doNot(NumberSchema toNegateSchema) {

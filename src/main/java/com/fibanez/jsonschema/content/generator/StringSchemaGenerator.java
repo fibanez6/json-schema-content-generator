@@ -2,8 +2,8 @@ package com.fibanez.jsonschema.content.generator;
 
 import com.fibanez.jsonschema.content.Context;
 import com.fibanez.jsonschema.content.generator.abstraction.RangeGenerator;
-import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType;
-import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType.Encode;
+import com.fibanez.jsonschema.content.generator.contentType.ContentType;
+import com.fibanez.jsonschema.content.generator.contentType.ContentType.Encode;
 import com.fibanez.jsonschema.content.generator.stringFormat.FormatGenerator.Format;
 import com.fibanez.jsonschema.content.generator.stringFormat.RegexGenerator;
 import lombok.AccessLevel;
@@ -36,11 +36,13 @@ public final class StringSchemaGenerator implements SchemaGenerator<StringSchema
             int minLength = getMinimumLength(schema.getMinLength(), schema.getMaxLength());
             int maxLength = getMaximumLength(minLength, schema.getMaxLength());
             return rangeGenerator.get(minLength, maxLength);
-        } else if (generator instanceof ContentMediaType) {
-            ContentMediaType contentTypeGenerator = (ContentMediaType) generator;
-            String contentEncode = (String) schema.getUnprocessedProperties().getOrDefault(CONTENT_ENCODING, Encode.UTF8.value());
+        } else if (generator instanceof ContentType) {
+            ContentType contentTypeGenerator = (ContentType) generator;
+            Map<String, Object> unprocessedProperties = schema.getUnprocessedProperties();
+            String contentType = (String) unprocessedProperties.get(CONTENT_MEDIA_TYPE);
+            String contentEncode = (String) unprocessedProperties.getOrDefault(CONTENT_ENCODING, Encode.DEFAULT.value());
             Encode encode = Encode.getByValue(contentEncode);
-            return contentTypeGenerator.get(encode);
+            return contentTypeGenerator.get(contentType, encode);
         }
 
         return generator.get();

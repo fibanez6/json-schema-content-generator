@@ -13,8 +13,8 @@ import com.fibanez.jsonschema.content.generator.NumberSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.ObjectSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.ReferenceSchemaGenerator;
 import com.fibanez.jsonschema.content.generator.StringSchemaGenerator;
-import com.fibanez.jsonschema.content.generator.contentMediaType.ContentMediaType.ContentType;
-import com.fibanez.jsonschema.content.generator.contentMediaType.ImagePngGenerator;
+import com.fibanez.jsonschema.content.generator.contentType.ContentType.MimeType;
+import com.fibanez.jsonschema.content.generator.contentType.ImageContentGenerator;
 import com.fibanez.jsonschema.content.generator.exception.GeneratorException;
 import com.fibanez.jsonschema.content.generator.javaType.IntegerGenerator;
 import com.fibanez.jsonschema.content.generator.javaType.StringGenerator;
@@ -221,7 +221,7 @@ class ContextTest {
                 .build();
         Context context = createContext(config);
         Map<String, Generator<String>> contentMediaTypeGenerators = context.getStringContentTypeGenerators();
-        assertInstanceOf(ImagePngGenerator.class, contentMediaTypeGenerators.get(ContentType.IMAGE_PNG.value()));
+        assertInstanceOf(ImageContentGenerator.class, contentMediaTypeGenerators.get(MimeType.IMAGE.value()));
         assertInstanceOf(Generator.class, contentMediaTypeGenerators.get(rndKey));
     }
 

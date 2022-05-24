@@ -9,10 +9,14 @@ public class GeneratorException extends RuntimeException {
     }
 
     public GeneratorException(String message, Object... args) {
-        super(new Formatter().format(message, args).toString());
+        this(new Formatter().format(message, args).toString());
     }
 
-    public GeneratorException(String message, Throwable cause) {
+    public GeneratorException(Throwable cause, String message, Object... args) {
+        this(cause, new Formatter().format(message, args).toString());
+    }
+
+    public GeneratorException(Throwable cause, String message) {
         super(message, cause);
     }
 }

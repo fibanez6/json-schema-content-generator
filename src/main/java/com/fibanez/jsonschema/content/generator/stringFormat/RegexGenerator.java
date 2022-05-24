@@ -38,7 +38,7 @@ public final class RegexGenerator implements FormatGenerator, SingleArgGenerator
             return writer.toString();
         } catch (final IOException ioe) {
             // this should never ever happen while writing to a StringWriter
-            throw new GeneratorException("Error in sanitizing pattern", ioe);
+            throw new GeneratorException(ioe, "Error in sanitizing pattern");
         }
     }
 
