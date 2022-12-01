@@ -10,9 +10,23 @@
 
     <packaging>jar</packaging>
     <name>Json Schema Content Generator</name>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/fibanez6/json-schema-content-generator.git</connection>
+        <developerConnection>scm:git:https://github.com/fibanez6/json-schema-content-generator.git</developerConnection>
+        <url>https://github.com/fibanez6/json-schema-content-generator</url>
+    </scm>
+
     <developers>
         <developer>
             <name>Fernando Ibanez</name>
+            <email>fiabnez84@gmail.com</email>
         </developer>
     </developers>
 
