@@ -31,7 +31,7 @@ To import this into your project, please add the following dependency:
 <dependency>
     <groupId>com.fibanez</groupId>
     <artifactId>json-schema-content-generator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>{latest-version}}</version>
 </dependency>
 ----
 
