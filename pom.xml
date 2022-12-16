@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.fibanez</groupId>
     <artifactId>json-schema-content-generator</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
 
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
@@ -46,7 +46,7 @@
         <connection>scm:git:git://github.com/fibanez6/json-schema-content-generator.git</connection>
         <developerConnection>scm:git:https://github.com/fibanez6/json-schema-content-generator.git</developerConnection>
         <url>https://github.com/fibanez6/json-schema-content-generator</url>
-        <tag>json-schema-content-generator-1.0.0</tag>
+        <tag>json-schema-content-generator-1.0.3</tag>
     </scm>
 
     <properties>
