@@ -36,6 +36,7 @@ import static org.apache.commons.lang3.Validate.isTrue;
  * The context is saved in a thread-local
  */
 @Getter
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class Context {
 
     public static final String DEFAULT_INITIAL_PATH = "$";
@@ -103,7 +104,7 @@ public class Context {
     private final Integer arrayItemsMargin;
 
     // for schemas
-    private final Map<Class<Schema>, SchemaGenerator<? extends Schema>> schemaGenerators;
+    private final Map<Class<Schema>, ? extends SchemaGenerator> schemaGenerators;
 
     // for string formats
     private final Map<String, Generator<String>> stringFormatGenerators;
@@ -176,8 +177,9 @@ public class Context {
         this.stringContentTypeGenerators = Map.copyOf(contentType);
 
         // Java type generators
-        Map<Class<?>, Generator<?>> javaTypes = getDefaultJavaTypeGenerators();
-        javaTypes.putAll(config.getJavaTypeGenerators());
+        Map javaTypes = getDefaultJavaTypeGenerators();
+        Map<Class<?>, Generator<?>> javaTypeGenerators = config.getJavaTypeGenerators();
+        javaTypes.putAll(javaTypeGenerators);
         this.javaTypeGenerators = Map.copyOf(javaTypes);
 
         // Predefined property name or path generators
@@ -192,8 +194,7 @@ public class Context {
         return THREAD_LOCAL.get();
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<Class<Schema>, SchemaGenerator<? extends Schema>> getDefaultSchemaGenerators() {
+    private Map<Class<Schema>, ? extends SchemaGenerator> getDefaultSchemaGenerators() {
         Stream<Class<? extends SchemaGenerator>> stream = getSubClassesOf(SchemaGenerator.class);
         return stream
                 .map(c -> getDefaultInstanceOf(c, this))
@@ -229,8 +230,7 @@ public class Context {
     /**
      * @return Collection of Java types and their default generators
      */
-    @SuppressWarnings("unchecked")
-    private Map<Class<?>, Generator<?>> getDefaultJavaTypeGenerators() {
+    private Map<Class<?>, ? extends JavaTypeGenerator> getDefaultJavaTypeGenerators() {
         Stream<Class<? extends JavaTypeGenerator>> stream = getSubClassesOf(JavaTypeGenerator.class);
         return stream
                 .map(c -> getDefaultInstanceOf(c, this))
@@ -246,7 +246,7 @@ public class Context {
     }
 
     public static SchemaGenerator<? extends Schema> getSchemaGenerator(@NonNull Class<? extends Schema> schemaClass) {
-        Map<Class<Schema>, SchemaGenerator<? extends Schema>> schemaGenerators = current().getSchemaGenerators();
+        Map<Class<Schema>, ? extends SchemaGenerator> schemaGenerators = current().getSchemaGenerators();
         if (schemaGenerators.containsKey(schemaClass)) {
             return schemaGenerators.get(schemaClass);
         }
@@ -272,7 +272,6 @@ public class Context {
         throw new GeneratorException("String format generator not found for: " + contentType);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> JavaTypeGenerator<T> getJavaTypeGenerator(@NonNull Class<T> type) {
         Map<Class<?>, Generator<?>> javaTypeGenerators = current().getJavaTypeGenerators();
         if (javaTypeGenerators.containsKey(type)) {
