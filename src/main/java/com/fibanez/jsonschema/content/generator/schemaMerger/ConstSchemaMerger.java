@@ -18,8 +18,8 @@ final class ConstSchemaMerger implements SchemaMerger {
 
     @Override
     public SchemaMerger combine(Schema schema) {
-        if (schema instanceof ConstSchema) {
-            this.constSchema = (ConstSchema) schema;
+        if (schema instanceof ConstSchema constSchema) {
+            this.constSchema = constSchema;
         } else if (constSchema != null) {
             return SchemaMerger.forSchema(schema).combine(schema).combine(constSchema);
         } else {

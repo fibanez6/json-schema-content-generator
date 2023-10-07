@@ -40,8 +40,8 @@ public final class SchemaCombinator {
 
         SchemaMerger merger = SchemaMerger.forSchema(schemas.get(0));
         for (Schema subSchema : schemas) {
-            if (subSchema instanceof NotSchema) {
-                merger = merger.not(((NotSchema) subSchema).getMustNotMatch());
+            if (subSchema instanceof NotSchema notSchema) {
+                merger = merger.not(notSchema.getMustNotMatch());
             } else {
                 merger = merger.combine(subSchema);
             }
@@ -83,14 +83,14 @@ public final class SchemaCombinator {
         while (!queueToProcess.isEmpty()) {
             Schema subSchema = queueToProcess.poll();
             // Merge all schemas type of if-then-else and push back to the queue
-            if (subSchema instanceof ConditionalSchema) {
-                List<Schema> schemas = getSubSchemasFrom((ConditionalSchema) subSchema);
+            if (subSchema instanceof ConditionalSchema conditionalSchema) {
+                List<Schema> schemas = getSubSchemasFrom(conditionalSchema);
                 queueToProcess.addAll(schemas);
                 continue;
             }
             // Merge all schemas type of oneOf, anyOf and allOf and push back to the queue
-            if (subSchema instanceof CombinedSchema) {
-                List<Schema> schemas = getSubSchemasFrom((CombinedSchema) subSchema);
+            if (subSchema instanceof CombinedSchema combinedSchema) {
+                List<Schema> schemas = getSubSchemasFrom(combinedSchema);
                 queueToProcess.addAll(schemas);
                 continue;
             }

@@ -21,8 +21,8 @@ final class NumberSchemaMerger implements SchemaMerger {
 
     @Override
     public SchemaMerger combine(Schema schema) {
-        if (schema instanceof NumberSchema) {
-            doCombine((NumberSchema) schema);
+        if (schema instanceof NumberSchema numberSchema) {
+            doCombine(numberSchema);
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
@@ -31,8 +31,8 @@ final class NumberSchemaMerger implements SchemaMerger {
 
     @Override
     public NumberSchemaMerger not(Schema schema) {
-        if (schema instanceof NumberSchema) {
-            doNot((NumberSchema) schema);
+        if (schema instanceof NumberSchema numberSchema) {
+            doNot(numberSchema);
         } else {
             throw new GeneratorException("Unsupported negate schema '%s'", schema.getClass());
         }

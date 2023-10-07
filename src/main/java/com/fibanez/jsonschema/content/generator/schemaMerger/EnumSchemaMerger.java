@@ -24,10 +24,10 @@ final class EnumSchemaMerger implements SchemaMerger {
 
     @Override
     public SchemaMerger combine(Schema schema) {
-        if (schema instanceof EnumSchema) {
-            doCombine((EnumSchema) schema);
-        } else if (schema instanceof ConstSchema) {
-            doCombine((ConstSchema) schema);
+        if (schema instanceof EnumSchema enumSchema) {
+            doCombine(enumSchema);
+        } else if (schema instanceof ConstSchema constSchema) {
+            doCombine(constSchema);
         } else if (schema instanceof StringSchema) {
             // do nothing
         } else {
@@ -38,10 +38,10 @@ final class EnumSchemaMerger implements SchemaMerger {
 
     @Override
     public EnumSchemaMerger not(Schema schema) {
-        if (schema instanceof EnumSchema) {
-            doNot((EnumSchema) schema);
-        } else if (schema instanceof ConstSchema) {
-            doNot((ConstSchema) schema);
+        if (schema instanceof EnumSchema enumSchema) {
+            doNot(enumSchema);
+        } else if (schema instanceof ConstSchema constSchema) {
+            doNot(constSchema);
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }

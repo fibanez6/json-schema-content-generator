@@ -23,8 +23,8 @@ final class ObjectSchemaMerger implements SchemaMerger {
 
     @Override
     public ObjectSchemaMerger combine(Schema schema) {
-        if (schema instanceof ObjectSchema) {
-            doCombine((ObjectSchema) schema);
+        if (schema instanceof ObjectSchema objectSchema) {
+            doCombine(objectSchema);
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }
@@ -33,8 +33,8 @@ final class ObjectSchemaMerger implements SchemaMerger {
 
     @Override
     public ObjectSchemaMerger not(Schema schema) {
-        if (schema instanceof ObjectSchema) {
-            doNot((ObjectSchema) schema);
+        if (schema instanceof ObjectSchema objectSchema) {
+            doNot(objectSchema);
         } else {
             throw new GeneratorException("Unsupported merge schema '%s'", schema.getClass());
         }

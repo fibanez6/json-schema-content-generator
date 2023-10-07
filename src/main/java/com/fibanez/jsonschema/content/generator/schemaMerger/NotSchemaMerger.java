@@ -32,8 +32,8 @@ public class NotSchemaMerger implements SchemaMerger {
      * Collect consecutive NotSchemas or ConstSchema schemas to process them later.
      */
     public SchemaMerger process(Schema schema) {
-        if (schema instanceof NotSchema) {
-            mustNotMatchQueue.add(((NotSchema) schema).getMustNotMatch());
+        if (schema instanceof NotSchema notSchema) {
+            mustNotMatchQueue.add(notSchema.getMustNotMatch());
         } else if (mustNotMatchQueue.isEmpty() || schema instanceof ConstSchema) {
             mustNotMatchQueue.add(schema);
         } else {

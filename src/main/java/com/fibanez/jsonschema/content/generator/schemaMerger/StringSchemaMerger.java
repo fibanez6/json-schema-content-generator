@@ -16,8 +16,8 @@ final class StringSchemaMerger implements SchemaMerger {
 
     @Override
     public SchemaMerger combine(Schema schema) {
-        if (schema instanceof StringSchema) {
-            doCombine((StringSchema) schema);
+        if (schema instanceof StringSchema stringSchema) {
+            doCombine(stringSchema);
         } else if (schema instanceof EnumSchema) {
             // StringSchema vs EnumSchema then returns EnumSchema
             return new EnumSchemaMerger().combine(schema);
@@ -32,8 +32,8 @@ final class StringSchemaMerger implements SchemaMerger {
 
     @Override
     public SchemaMerger not(Schema schema) {
-        if (schema instanceof StringSchema) {
-            doNot((StringSchema) schema);
+        if (schema instanceof StringSchema stringSchema) {
+            doNot(stringSchema);
         } else if (schema instanceof EnumSchema) {
             // StringSchema vs EnumSchema then returns not EnumSchema
             return new NotSchemaMerger().not(schema);
