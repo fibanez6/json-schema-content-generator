@@ -10,7 +10,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main", "upgrade-j17" ]
+    branches: [ "main", "release-jdk17" ]
   pull_request:
     branches: [ "main" ]
 
