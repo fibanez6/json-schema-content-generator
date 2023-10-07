@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.fibanez</groupId>
     <artifactId>json-schema-content-generator</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
@@ -46,12 +46,12 @@
         <connection>scm:git:git://github.com/fibanez6/json-schema-content-generator.git</connection>
         <developerConnection>scm:git:https://github.com/fibanez6/json-schema-content-generator.git</developerConnection>
         <url>https://github.com/fibanez6/json-schema-content-generator</url>
-        <tag>json-schema-content-generator-1.0.0</tag>
+        <tag>json-schema-content-generator-2.0.0</tag>
     </scm>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
         <lombok.version>1.18.30</lombok.version>
